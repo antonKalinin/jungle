@@ -8,5 +8,4 @@ version = "0.1.0"
 
 [dependencies]
 argh = "0.1"
-bevy = "0.1"
-rand = "0.7"
+bevy = "0.1.3"
