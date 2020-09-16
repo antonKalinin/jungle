@@ -36,13 +36,13 @@ trait AABB {
         let other_position = other.position();
         let other_size = other.size();
 
-        if self_position[AXIS_X] - other_position[AXIS_X]
+        if (self_position[AXIS_X] - other_position[AXIS_X]).abs()
             > self_size[AXIS_X] / 2.0 + other_size[AXIS_X] / 2.0
         {
             return false;
         }
 
-        if self_position[AXIS_Y] - other_position[AXIS_Y]
+        if (self_position[AXIS_Y] - other_position[AXIS_Y]).abs()
             > self_size[AXIS_Y] / 2.0 + other_size[AXIS_Y] / 2.0
         {
             return false;
@@ -54,8 +54,9 @@ trait AABB {
     fn size(&self) -> Vec2;
 }
 
+struct Camera {}
+
 struct Player {
-    scale: f32,
     position: Vec2,
     size: Vec2,
     velocity: Vec2,
@@ -71,13 +72,12 @@ impl AABB for Player {
     }
 }
 
-struct Tile {
-    scale: f32,
+struct Object {
     position: Vec2,
     size: Vec2,
 }
 
-impl AABB for Tile {
+impl AABB for Object {
     fn position(&self) -> Vec2 {
         self.position.clone()
     }
@@ -121,10 +121,14 @@ fn startup(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     let scale = options.scale as f32;
-    let bottom = scale * (-BG_HEIGHT / 2.0 + 20.0);
+    let bottom = scale * (-BG_HEIGHT / 2.0 + 8.0);
 
-    // Add the game's entities to our world
-    commands.spawn(Camera2dComponents::default());
+    commands
+        .spawn(Camera2dComponents {
+            translation: Translation::new(0.0, 0.0, 20.0),
+            ..Default::default()
+        })
+        .with(Camera {});
 
     for i in 1..=5 {
         let bg_handle = asset_server
@@ -140,7 +144,7 @@ fn startup(
                     ..Default::default()
                 })
                 .with(Background {
-                    acceleration: 0.2 * i as f32,
+                    acceleration: 0.2 * (5 - i) as f32,
                 });
         }
     }
@@ -163,28 +167,27 @@ fn startup(
     let jump_texture = textures.get(&jump_texture_handle).unwrap();
     let jump_texture_atlas = TextureAtlas::from_grid(jump_texture_handle, jump_texture.size, 1, 1);
 
-    let tile_texture_handle = asset_server
+    let object_texture_handle = asset_server
         .load_sync(&mut textures, "assets/tileset.png")
         .unwrap();
-    let tile_texture = textures.get(&tile_texture_handle).unwrap();
-    let tile_texture_atlas =
-        TextureAtlas::from_grid(tile_texture_handle, tile_texture.size, 48, 23);
+    let object_texture = textures.get(&object_texture_handle).unwrap();
+    let object_texture_atlas =
+        TextureAtlas::from_grid(object_texture_handle, object_texture.size, 48, 23);
 
     let run_atlas_handle = texture_atlases.add(run_texture_atlas);
     let idle_atlas_handle = texture_atlases.add(idle_texture_atlas);
     let jump_atlas_handle = texture_atlases.add(jump_texture_atlas);
-    let tile_atlas_handle = texture_atlases.add(tile_texture_atlas);
+    let object_atlas_handle = texture_atlases.add(object_texture_atlas);
 
     commands
         .spawn(SpriteSheetComponents {
             scale: Scale(scale),
-            translation: Translation::new(0.0, bottom, 10.0),
+            translation: Translation::new(0.0, bottom, 15.0),
             texture_atlas: idle_atlas_handle.clone(),
             ..Default::default()
         })
         .with(Player {
-            scale,
-            size: Vec2::new(34.0, 20.0),
+            size: Vec2::new(19.0 * scale, 34.0 * scale),
             position: Vec2::new(0.0, 0.0),
             velocity: Vec2::new(0.0, 0.0),
         })
@@ -198,38 +201,34 @@ fn startup(
 
     commands.insert_resource(sprites);
 
-    commands
-        .spawn(SpriteSheetComponents {
-            scale: Scale(scale),
-            sprite: TextureAtlasSprite::new(101),
-            texture_atlas: tile_atlas_handle.clone(),
-            translation: Translation::new(100.0, bottom - 10.0, 11.0),
-            ..Default::default()
-        })
-        .with(Tile {
-            scale,
-            size: Vec2::new(16.0, 16.0),
-            position: Vec2::new(10.0, 0.0),
-        });
+    for i in -20..=20 {
+        commands
+            .spawn(SpriteSheetComponents {
+                scale: Scale(scale),
+                sprite: TextureAtlasSprite::new(101),
+                texture_atlas: object_atlas_handle.clone(),
+                translation: Translation::new(i as f32 * 16.0 * scale, bottom, 10.0),
+                ..Default::default()
+            })
+            .with(Object {
+                size: Vec2::new(16.0 * scale, 16.0 * scale),
+                position: Vec2::new(i as f32 * 16.0 * scale, bottom),
+            });
+    }
 }
 
 fn movement(
-    time: Res<Time>,
-    options: Res<Options>,
     keyboard_input: Res<Input<KeyCode>>,
-    mut player_query: Query<(&mut Player, &mut Translation, &mut Rotation)>,
+    mut player_query: Query<&mut Player>,
+    mut object_query: Query<&Object>,
 ) {
-    let bottom = options.scale as f32 * (-BG_HEIGHT / 2.0 + 20.0);
-
-    for (mut player, mut translation, mut rotation) in &mut player_query.iter() {
-        if keyboard_input.pressed(KeyCode::Left) {
+    for mut player in &mut player_query.iter() {
+        if keyboard_input.pressed(KeyCode::Right) {
             player.velocity[AXIS_X] = PLAYER_HORIZONTAL_SPEED;
-            *rotation = Rotation(Quat::from_rotation_y(std::f32::consts::PI));
         }
 
-        if keyboard_input.pressed(KeyCode::Right) {
+        if keyboard_input.pressed(KeyCode::Left) {
             player.velocity[AXIS_X] = -PLAYER_HORIZONTAL_SPEED;
-            *rotation = Rotation(Quat::from_rotation_y(0.0));
         }
 
         if keyboard_input.just_released(KeyCode::Up) {
@@ -242,14 +241,18 @@ fn movement(
             player.velocity[AXIS_X] = 0.0;
         }
 
-        if player.velocity[AXIS_Y] != 0.0 {
-            translation[AXIS_Y] = translation[AXIS_Y] + player.velocity[AXIS_Y];
-        }
+        player.position[AXIS_X] += player.velocity[AXIS_X];
+        player.position[AXIS_Y] += player.velocity[AXIS_Y];
 
-        if translation[AXIS_Y] > bottom {
-            player.velocity[AXIS_Y] -= GRAVITY * time.delta_seconds;
-        } else {
-            player.velocity[AXIS_Y] = 0.0;
+        for object in &mut object_query.iter() {
+            if player.collides(object) {
+                let sign = player.velocity[AXIS_X].signum();
+
+                player.position[AXIS_X] = object.position[AXIS_X]
+                    - sign * (object.size[AXIS_X] / 2.0 + player.size[AXIS_X] / 2.0 + 1.0);
+
+                player.velocity[AXIS_X] = 0.0;
+            }
         }
     }
 }
@@ -259,19 +262,33 @@ fn animation(
     sprites: Res<Sprites>,
     texture_atlases: Res<Assets<TextureAtlas>>,
     mut player_query: Query<(
-        &mut Player,
+        &Player,
+        &mut Rotation,
+        &mut Translation,
         &mut Timer,
         &mut TextureAtlasSprite,
         &mut Handle<TextureAtlas>,
     )>,
-    mut bg_query: Query<(&Background, &mut Translation)>,
+    mut camera_query: Query<(&Camera, &mut Translation)>,
+    mut background_query: Query<(&Background, &mut Translation)>,
 ) {
     let scale = options.scale as f32;
 
-    for (player, timer, mut sprite, mut texture_atlas_handle) in &mut player_query.iter() {
+    for (player, mut rotation, mut translation, timer, mut sprite, mut texture_atlas_handle) in
+        &mut player_query.iter()
+    {
+        translation[AXIS_X] = player.position[AXIS_X];
+        translation[AXIS_Y] = player.position[AXIS_Y];
+
         if player.velocity[AXIS_X] != 0.0 {
             if let Some(sprite_handle) = sprites.get("player_run") {
                 *texture_atlas_handle = *sprite_handle;
+            }
+
+            if player.velocity[AXIS_X] > 0.0 {
+                *rotation = Rotation(Quat::from_rotation_y(0.0));
+            } else {
+                *rotation = Rotation(Quat::from_rotation_y(std::f32::consts::PI));
             }
         } else {
             if let Some(sprite_handle) = sprites.get("player_idle") {
@@ -290,15 +307,17 @@ fn animation(
             sprite.index = ((sprite.index as usize + 1) % texture_atlas.textures.len()) as u32;
         }
 
-        for (background, mut translation) in &mut bg_query.iter() {
-            let step = player.velocity[AXIS_X] * background.acceleration;
+        for (_, mut translation) in &mut camera_query.iter() {
+            translation[AXIS_X] = player.position[AXIS_X];
+        }
 
-            *translation.0.x_mut() += step;
+        for (background, mut translation) in &mut background_query.iter() {
+            *translation.0.x_mut() += player.velocity[AXIS_X] * background.acceleration;
 
-            if translation.0.x() > BG_WIDTH * scale {
-                *translation.0.x_mut() -= 2.0 * BG_WIDTH * scale;
-            } else if translation.0.x() < -BG_WIDTH * scale {
+            if player.position[AXIS_X] - translation.0.x() > BG_WIDTH * scale {
                 *translation.0.x_mut() += 2.0 * BG_WIDTH * scale;
+            } else if player.position[AXIS_X] - translation.0.x() < -BG_WIDTH * scale {
+                *translation.0.x_mut() -= 2.0 * BG_WIDTH * scale;
             }
         }
     }
