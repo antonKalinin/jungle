@@ -2,8 +2,6 @@ use argh::FromArgs;
 use bevy::{prelude::*, render::pass::ClearColor};
 use std::collections::HashMap;
 
-const AXIS_X: usize = 0;
-const AXIS_Y: usize = 1;
 const BG_WIDTH: f32 = 384.0;
 const BG_HEIGHT: f32 = 216.0;
 const GRAVITY: f32 = 32.0;
@@ -31,25 +29,35 @@ struct Background {
 
 trait AABB {
     fn collides(&self, other: &impl AABB) -> bool {
-        let self_position = self.position();
-        let self_size = self.size();
-        let other_position = other.position();
-        let other_size = other.size();
+        let (self_x, self_y) = <(f32, f32)>::from(self.position());
+        let (self_size_x, self_size_y) = <(f32, f32)>::from(self.size());
+        let (other_x, other_y) = <(f32, f32)>::from(other.position());
+        let (other_size_x, other_size_y) = <(f32, f32)>::from(other.size());
 
-        if (self_position[AXIS_X] - other_position[AXIS_X]).abs()
-            > self_size[AXIS_X] / 2.0 + other_size[AXIS_X] / 2.0
+        if (self_x - other_x).abs() < (self_size_x / 2.0 + other_size_x / 2.0)
+            && (self_y - other_y).abs() < (self_size_y / 2.0 + other_size_y / 2.0)
         {
-            return false;
+            return true;
         }
 
-        if (self_position[AXIS_Y] - other_position[AXIS_Y]).abs()
-            > self_size[AXIS_Y] / 2.0 + other_size[AXIS_Y] / 2.0
-        {
-            return false;
-        }
-
-        true
+        false
     }
+
+    fn collision_by_axis(&self, other: &impl AABB) -> Vec2 {
+        let (self_x, self_y) = <(f32, f32)>::from(self.position());
+        let (self_size_x, self_size_y) = <(f32, f32)>::from(self.size());
+        let (other_x, other_y) = <(f32, f32)>::from(other.position());
+        let (other_size_x, other_size_y) = <(f32, f32)>::from(other.size());
+
+        let h = (self_x - other_x).signum()
+            * ((self_x - other_x).abs() - (self_size_x / 2.0 + other_size_x / 2.0));
+
+        let v = (self_y - other_y).signum()
+            * ((self_y - other_y).abs() - (self_size_y / 2.0 + other_size_y / 2.0));
+
+        Vec2::new(h, v)
+    }
+
     fn position(&self) -> Vec2;
     fn size(&self) -> Vec2;
 }
@@ -187,7 +195,7 @@ fn startup(
             ..Default::default()
         })
         .with(Player {
-            size: Vec2::new(19.0 * scale, 34.0 * scale),
+            size: Vec2::new(19.0 * scale, 33.0 * scale),
             position: Vec2::new(0.0, 0.0),
             velocity: Vec2::new(0.0, 0.0),
         })
@@ -215,43 +223,73 @@ fn startup(
                 position: Vec2::new(i as f32 * 16.0 * scale, bottom),
             });
     }
+
+    commands
+        .spawn(SpriteSheetComponents {
+            scale: Scale(scale),
+            sprite: TextureAtlasSprite::new(101),
+            texture_atlas: object_atlas_handle.clone(),
+            translation: Translation::new(5.0 * 16.0 * scale, bottom + 16.0 * scale, 10.0),
+            ..Default::default()
+        })
+        .with(Object {
+            size: Vec2::new(16.0 * scale, 16.0 * scale),
+            position: Vec2::new(5.0 * 16.0 * scale, bottom + 16.0 * scale),
+        });
 }
 
 fn movement(
+    time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
     mut player_query: Query<&mut Player>,
     mut object_query: Query<&Object>,
 ) {
     for mut player in &mut player_query.iter() {
         if keyboard_input.pressed(KeyCode::Right) {
-            player.velocity[AXIS_X] = PLAYER_HORIZONTAL_SPEED;
+            player.velocity.set_x(PLAYER_HORIZONTAL_SPEED);
         }
 
         if keyboard_input.pressed(KeyCode::Left) {
-            player.velocity[AXIS_X] = -PLAYER_HORIZONTAL_SPEED;
-        }
-
-        if keyboard_input.just_released(KeyCode::Up) {
-            player.velocity[AXIS_Y] = PLAYER_INITIAL_VERTICAL_SPEED;
+            player.velocity.set_x(-PLAYER_HORIZONTAL_SPEED);
         }
 
         if keyboard_input.just_released(KeyCode::Right)
             || keyboard_input.just_released(KeyCode::Left)
         {
-            player.velocity[AXIS_X] = 0.0;
+            player.velocity.set_x(0.0);
         }
 
-        player.position[AXIS_X] += player.velocity[AXIS_X];
-        player.position[AXIS_Y] += player.velocity[AXIS_Y];
+        if keyboard_input.pressed(KeyCode::Up) {
+            if player.velocity.y() == 0.0 {
+                player.velocity.set_y(PLAYER_INITIAL_VERTICAL_SPEED);
+            }
+        }
+
+        // player is constantly affected by gravity
+        *player.velocity.y_mut() -= GRAVITY * time.delta_seconds;
+
+        *player.position.x_mut() += player.velocity.x();
+        *player.position.y_mut() += player.velocity.y();
 
         for object in &mut object_query.iter() {
             if player.collides(object) {
-                let sign = player.velocity[AXIS_X].signum();
+                let collision = player.collision_by_axis(object);
 
-                player.position[AXIS_X] = object.position[AXIS_X]
-                    - sign * (object.size[AXIS_X] / 2.0 + player.size[AXIS_X] / 2.0 + 1.0);
+                if collision.y().abs() < collision.x().abs() {
+                    let sign_y = player.velocity.y().signum();
 
-                player.velocity[AXIS_X] = 0.0;
+                    *player.position.y_mut() = object.position.y()
+                        - sign_y * (object.size.y() / 2.0 + player.size.y() / 2.0);
+
+                    player.velocity.set_y(0.0);
+                } else {
+                    let sign_x = collision.x().signum();
+
+                    *player.position.x_mut() = object.position.x()
+                        - sign_x * (object.size.x() / 2.0 + player.size.x() / 2.0);
+
+                    player.velocity.set_x(0.0);
+                }
             }
         }
     }
@@ -277,15 +315,15 @@ fn animation(
     for (player, mut rotation, mut translation, timer, mut sprite, mut texture_atlas_handle) in
         &mut player_query.iter()
     {
-        translation[AXIS_X] = player.position[AXIS_X];
-        translation[AXIS_Y] = player.position[AXIS_Y];
+        *translation.x_mut() = player.position.x();
+        *translation.y_mut() = player.position.y();
 
-        if player.velocity[AXIS_X] != 0.0 {
+        if player.velocity.x() != 0.0 {
             if let Some(sprite_handle) = sprites.get("player_run") {
                 *texture_atlas_handle = *sprite_handle;
             }
 
-            if player.velocity[AXIS_X] > 0.0 {
+            if player.velocity.x() > 0.0 {
                 *rotation = Rotation(Quat::from_rotation_y(0.0));
             } else {
                 *rotation = Rotation(Quat::from_rotation_y(std::f32::consts::PI));
@@ -296,7 +334,7 @@ fn animation(
             }
         }
 
-        if player.velocity[AXIS_Y] != 0.0 {
+        if player.velocity.y() != 0.0 {
             if let Some(sprite_handle) = sprites.get("player_jump") {
                 *texture_atlas_handle = *sprite_handle;
             }
@@ -308,15 +346,15 @@ fn animation(
         }
 
         for (_, mut translation) in &mut camera_query.iter() {
-            translation[AXIS_X] = player.position[AXIS_X];
+            translation.set_x(player.position.x());
         }
 
         for (background, mut translation) in &mut background_query.iter() {
-            *translation.0.x_mut() += player.velocity[AXIS_X] * background.acceleration;
+            *translation.0.x_mut() += player.velocity.x() * background.acceleration;
 
-            if player.position[AXIS_X] - translation.0.x() > BG_WIDTH * scale {
+            if player.position.x() - translation.0.x() > BG_WIDTH * scale {
                 *translation.0.x_mut() += 2.0 * BG_WIDTH * scale;
-            } else if player.position[AXIS_X] - translation.0.x() < -BG_WIDTH * scale {
+            } else if player.position.x() - translation.0.x() < -BG_WIDTH * scale {
                 *translation.0.x_mut() -= 2.0 * BG_WIDTH * scale;
             }
         }
