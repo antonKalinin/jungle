@@ -1,3 +1,9 @@
+### Split animated GIF to sequence of PNGs:
+
+```
+convert run.gif run_%01d.png
+```
+
 ### To join 8 images into 1 sprite via ImageMagic:
 
 ```

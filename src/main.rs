@@ -27,8 +27,13 @@ struct Background {
     acceleration: f32,
 }
 
-trait AABB {
-    fn collides(&self, other: &impl AABB) -> bool {
+trait Object {
+    fn position(&self) -> Vec2;
+    fn size(&self) -> Vec2;
+}
+
+trait AABB: Object {
+    fn collides(&self, other: &impl Object) -> bool {
         let (self_x, self_y) = <(f32, f32)>::from(self.position());
         let (self_size_x, self_size_y) = <(f32, f32)>::from(self.size());
         let (other_x, other_y) = <(f32, f32)>::from(other.position());
@@ -43,7 +48,7 @@ trait AABB {
         false
     }
 
-    fn collision_by_axis(&self, other: &impl AABB) -> Vec2 {
+    fn collision_by_axis(&self, other: &impl Object) -> Vec2 {
         let (self_x, self_y) = <(f32, f32)>::from(self.position());
         let (self_size_x, self_size_y) = <(f32, f32)>::from(self.size());
         let (other_x, other_y) = <(f32, f32)>::from(other.position());
@@ -57,9 +62,6 @@ trait AABB {
 
         Vec2::new(h, v)
     }
-
-    fn position(&self) -> Vec2;
-    fn size(&self) -> Vec2;
 }
 
 struct Camera {}
@@ -70,7 +72,7 @@ struct Player {
     velocity: Vec2,
 }
 
-impl AABB for Player {
+impl Object for Player {
     fn position(&self) -> Vec2 {
         self.position.clone()
     }
@@ -80,12 +82,14 @@ impl AABB for Player {
     }
 }
 
-struct Object {
+impl AABB for Player {}
+
+struct Block {
     position: Vec2,
     size: Vec2,
 }
 
-impl AABB for Object {
+impl Object for Block {
     fn position(&self) -> Vec2 {
         self.position.clone()
     }
@@ -175,17 +179,31 @@ fn startup(
     let jump_texture = textures.get(&jump_texture_handle).unwrap();
     let jump_texture_atlas = TextureAtlas::from_grid(jump_texture_handle, jump_texture.size, 1, 1);
 
-    let object_texture_handle = asset_server
+    let air_texture_handle = asset_server
+        .load_sync(&mut textures, "assets/player/air.png")
+        .unwrap();
+    let air_texture = textures.get(&air_texture_handle).unwrap();
+    let air_texture_atlas = TextureAtlas::from_grid(air_texture_handle, air_texture.size, 2, 1);
+
+    let land_texture_handle = asset_server
+        .load_sync(&mut textures, "assets/player/land.png")
+        .unwrap();
+    let land_texture = textures.get(&land_texture_handle).unwrap();
+    let land_texture_atlas = TextureAtlas::from_grid(land_texture_handle, land_texture.size, 1, 1);
+
+    let block_texture_handle = asset_server
         .load_sync(&mut textures, "assets/tileset.png")
         .unwrap();
-    let object_texture = textures.get(&object_texture_handle).unwrap();
-    let object_texture_atlas =
-        TextureAtlas::from_grid(object_texture_handle, object_texture.size, 48, 23);
+    let block_texture = textures.get(&block_texture_handle).unwrap();
+    let block_texture_atlas =
+        TextureAtlas::from_grid(block_texture_handle, block_texture.size, 48, 23);
 
+    let air_atlas_handle = texture_atlases.add(air_texture_atlas);
     let run_atlas_handle = texture_atlases.add(run_texture_atlas);
+    let land_texture_atlas = texture_atlases.add(land_texture_atlas);
     let idle_atlas_handle = texture_atlases.add(idle_texture_atlas);
     let jump_atlas_handle = texture_atlases.add(jump_texture_atlas);
-    let object_atlas_handle = texture_atlases.add(object_texture_atlas);
+    let block_atlas_handle = texture_atlases.add(block_texture_atlas);
 
     commands
         .spawn(SpriteSheetComponents {
@@ -203,9 +221,11 @@ fn startup(
 
     let mut sprites = Sprites::new();
 
+    sprites.add("player_air".to_string(), air_atlas_handle);
     sprites.add("player_run".to_string(), run_atlas_handle);
     sprites.add("player_idle".to_string(), idle_atlas_handle);
     sprites.add("player_jump".to_string(), jump_atlas_handle);
+    sprites.add("player_land".to_string(), land_texture_atlas);
 
     commands.insert_resource(sprites);
 
@@ -214,11 +234,11 @@ fn startup(
             .spawn(SpriteSheetComponents {
                 scale: Scale(scale),
                 sprite: TextureAtlasSprite::new(101),
-                texture_atlas: object_atlas_handle.clone(),
+                texture_atlas: block_atlas_handle.clone(),
                 translation: Translation::new(i as f32 * 16.0 * scale, bottom, 10.0),
                 ..Default::default()
             })
-            .with(Object {
+            .with(Block {
                 size: Vec2::new(16.0 * scale, 16.0 * scale),
                 position: Vec2::new(i as f32 * 16.0 * scale, bottom),
             });
@@ -228,13 +248,39 @@ fn startup(
         .spawn(SpriteSheetComponents {
             scale: Scale(scale),
             sprite: TextureAtlasSprite::new(101),
-            texture_atlas: object_atlas_handle.clone(),
+            texture_atlas: block_atlas_handle.clone(),
             translation: Translation::new(5.0 * 16.0 * scale, bottom + 16.0 * scale, 10.0),
             ..Default::default()
         })
-        .with(Object {
+        .with(Block {
             size: Vec2::new(16.0 * scale, 16.0 * scale),
             position: Vec2::new(5.0 * 16.0 * scale, bottom + 16.0 * scale),
+        });
+
+    commands
+        .spawn(SpriteSheetComponents {
+            scale: Scale(scale),
+            sprite: TextureAtlasSprite::new(101),
+            texture_atlas: block_atlas_handle.clone(),
+            translation: Translation::new(5.0 * 16.0 * scale, bottom + 32.0 * scale, 10.0),
+            ..Default::default()
+        })
+        .with(Block {
+            size: Vec2::new(16.0 * scale, 16.0 * scale),
+            position: Vec2::new(5.0 * 16.0 * scale, bottom + 32.0 * scale),
+        });
+
+    commands
+        .spawn(SpriteSheetComponents {
+            scale: Scale(scale),
+            sprite: TextureAtlasSprite::new(101),
+            texture_atlas: block_atlas_handle.clone(),
+            translation: Translation::new(5.0 * 16.0 * scale, bottom + 48.0 * scale, 10.0),
+            ..Default::default()
+        })
+        .with(Block {
+            size: Vec2::new(16.0 * scale, 16.0 * scale),
+            position: Vec2::new(5.0 * 16.0 * scale, bottom + 48.0 * scale),
         });
 }
 
@@ -242,7 +288,7 @@ fn movement(
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
     mut player_query: Query<&mut Player>,
-    mut object_query: Query<&Object>,
+    mut block_query: Query<&Block>,
 ) {
     for mut player in &mut player_query.iter() {
         if keyboard_input.pressed(KeyCode::Right) {
@@ -259,7 +305,7 @@ fn movement(
             player.velocity.set_x(0.0);
         }
 
-        if keyboard_input.pressed(KeyCode::Up) {
+        if keyboard_input.just_released(KeyCode::Up) {
             if player.velocity.y() == 0.0 {
                 player.velocity.set_y(PLAYER_INITIAL_VERTICAL_SPEED);
             }
@@ -271,22 +317,22 @@ fn movement(
         *player.position.x_mut() += player.velocity.x();
         *player.position.y_mut() += player.velocity.y();
 
-        for object in &mut object_query.iter() {
+        for object in &mut block_query.iter() {
             if player.collides(object) {
                 let collision = player.collision_by_axis(object);
+                let collision_sign_x = collision.x().signum();
+                let collision_sign_y = collision.y().signum();
+                let velocity_sign_y = player.velocity.y().signum();
 
-                if collision.y().abs() < collision.x().abs() {
-                    let sign_y = player.velocity.y().signum();
-
+                if collision.x().abs() > collision.y().abs() && collision_sign_y == velocity_sign_y
+                {
                     *player.position.y_mut() = object.position.y()
-                        - sign_y * (object.size.y() / 2.0 + player.size.y() / 2.0);
+                        - collision_sign_y * (object.size.y() / 2.0 + player.size.y() / 2.0);
 
                     player.velocity.set_y(0.0);
                 } else {
-                    let sign_x = collision.x().signum();
-
                     *player.position.x_mut() = object.position.x()
-                        - sign_x * (object.size.x() / 2.0 + player.size.x() / 2.0);
+                        - collision_sign_x * (object.size.x() / 2.0 + player.size.x() / 2.0);
 
                     player.velocity.set_x(0.0);
                 }
@@ -334,8 +380,14 @@ fn animation(
             }
         }
 
-        if player.velocity.y() != 0.0 {
+        if player.velocity.y() > 0.0 {
             if let Some(sprite_handle) = sprites.get("player_jump") {
+                *texture_atlas_handle = *sprite_handle;
+            }
+        }
+
+        if player.velocity.y() < 0.0 {
+            if let Some(sprite_handle) = sprites.get("player_land") {
                 *texture_atlas_handle = *sprite_handle;
             }
         }
