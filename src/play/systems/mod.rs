@@ -4,4 +4,5 @@ mod startup;
 
 pub use animation::animation;
 pub use movement::movement;
-pub use startup::startup;
+pub use startup::player::player;
+pub use startup::world::world;
