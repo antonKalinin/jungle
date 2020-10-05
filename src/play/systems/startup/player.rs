@@ -49,18 +49,22 @@ pub fn player(
   let idle_atlas_handle = texture_atlases.add(idle_texture_atlas);
   let jump_atlas_handle = texture_atlases.add(jump_texture_atlas);
 
+  let player_width = 19.0 * scale;
+  let player_height = 33.0 * scale;
+  let player = Player {
+    size: Vec2::new(player_width, player_height),
+    position: Vec2::new(player_width, player_height * 5.0),
+    velocity: Vec2::new(0.0, 0.0),
+  };
+
   commands
     .spawn(SpriteSheetComponents {
       scale: Scale(scale),
-      translation: Translation::new(0.0, 0.0, 15.0),
+      translation: Translation::new(player.position.x(), player.position.y(), 15.0),
       texture_atlas: idle_atlas_handle.clone(),
       ..Default::default()
     })
-    .with(Player {
-      size: Vec2::new(19.0 * scale, 33.0 * scale),
-      position: Vec2::new(0.0, 0.0),
-      velocity: Vec2::new(0.0, 0.0),
-    })
+    .with(player)
     .with(Timer::from_seconds(0.1, true));
 
   sprites.add("player_air".to_string(), air_atlas_handle);
