@@ -1,14 +1,20 @@
-extern crate tiled;
-
-mod play;
-mod resources;
-
-use bevy::{prelude::*, render::pass::ClearColor};
-use play::PlayPlugin;
-use resources::{GameState, Options, Sprites};
+use argh::FromArgs;
+use bevy::prelude::*;
 
 pub const WINDOW_WIDTH: f32 = 384.0;
 pub const WINDOW_HEIGHT: f32 = 216.0;
+
+#[derive(FromArgs)]
+#[argh(description = "Jungle game settings")]
+pub struct Options {
+  #[argh(
+    option,
+    default = "4",
+    short = 's',
+    description = "scale of game window"
+  )]
+  pub scale: u32,
+}
 
 fn main() {
   let options: Options = argh::from_env();
@@ -22,15 +28,9 @@ fn main() {
     ..Default::default()
   };
 
-  let sprites = Sprites::new();
-
   App::build()
     .add_resource(window)
     .add_resource(options)
-    .add_resource(sprites)
-    .add_resource(ClearColor(Color::rgb(0.01, 0.01, 0.01)))
-    .init_resource::<GameState>()
     .add_default_plugins()
-    .add_plugin(PlayPlugin)
     .run();
 }
