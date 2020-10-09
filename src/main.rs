@@ -3,11 +3,7 @@ extern crate tiled;
 mod play;
 mod resources;
 
-use bevy::{
-  diagnostic::{FrameTimeDiagnosticsPlugin, PrintDiagnosticsPlugin},
-  prelude::*,
-  render::pass::ClearColor,
-};
+use bevy::{prelude::*, render::pass::ClearColor};
 use play::PlayPlugin;
 use resources::{GameState, Options, Sprites};
 
@@ -36,7 +32,5 @@ fn main() {
     .init_resource::<GameState>()
     .add_default_plugins()
     .add_plugin(PlayPlugin)
-    .add_plugin(FrameTimeDiagnosticsPlugin::default())
-    .add_plugin(PrintDiagnosticsPlugin::default())
     .run();
 }
