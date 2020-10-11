@@ -1,6 +1,3 @@
 .DS_Store
-/about/*.excalidraw
-/about/*.mov
-/about/twits.md
 /target
 */.DS_Store
