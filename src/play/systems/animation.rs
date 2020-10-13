@@ -10,32 +10,22 @@ pub fn animation(
   texture_atlases: Res<Assets<TextureAtlas>>,
   mut player_query: Query<(
     &Player,
-    &mut Rotation,
-    &mut Translation,
+    &Transform,
     &mut Timer,
     &mut TextureAtlasSprite,
     &mut Handle<TextureAtlas>,
   )>,
-  mut camera_query: Query<(&Camera, &mut Translation)>,
-  mut background_query: Query<(&Background, &mut Translation)>,
+  mut camera_query: Query<(&Camera, &mut Transform)>,
+  mut background_query: Query<(&Background, &mut Transform)>,
 ) {
   let scale = options.scale as f32;
 
-  for (player, mut rotation, mut translation, timer, mut sprite, mut texture_atlas_handle) in
+  for (player, player_transform, timer, mut sprite, mut texture_atlas_handle) in
     &mut player_query.iter()
   {
-    *translation.x_mut() = player.position.x();
-    *translation.y_mut() = player.position.y();
-
     if player.velocity.x() != 0.0 {
       if let Some(sprite_handle) = sprites.get("player_run") {
         *texture_atlas_handle = *sprite_handle;
-      }
-
-      if player.velocity.x() > 0.0 {
-        *rotation = Rotation(Quat::from_rotation_y(0.0));
-      } else {
-        *rotation = Rotation(Quat::from_rotation_y(std::f32::consts::PI));
       }
     } else {
       if let Some(sprite_handle) = sprites.get("player_idle") {
@@ -60,17 +50,22 @@ pub fn animation(
       sprite.index = ((sprite.index as usize + 1) % texture_atlas.textures.len()) as u32;
     }
 
-    for (_, mut translation) in &mut camera_query.iter() {
-      translation.set_x(player.position.x());
+    for (_camera, mut camera_transform) in &mut camera_query.iter() {
+      camera_transform
+        .translation_mut()
+        .set_x(player_transform.translation().x());
     }
 
-    for (background, mut translation) in &mut background_query.iter() {
-      *translation.0.x_mut() += player.velocity.x() * background.acceleration;
+    for (background, mut background_transform) in &mut background_query.iter() {
+      let player_translation = player_transform.translation();
+      let background_translation = background_transform.translation_mut();
 
-      if player.position.x() - translation.0.x() > BG_WIDTH * scale {
-        *translation.0.x_mut() += 2.0 * BG_WIDTH * scale;
-      } else if player.position.x() - translation.0.x() < -BG_WIDTH * scale {
-        *translation.0.x_mut() -= 2.0 * BG_WIDTH * scale;
+      *background_translation.x_mut() += player.velocity.x() * background.acceleration;
+
+      if player_translation.x() - background_translation.x() > BG_WIDTH * scale {
+        *background_translation.x_mut() += 2.0 * BG_WIDTH * scale;
+      } else if player_translation.x() - background_translation.x() < -BG_WIDTH * scale {
+        *background_translation.x_mut() -= 2.0 * BG_WIDTH * scale;
       }
     }
   }

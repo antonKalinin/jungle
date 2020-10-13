@@ -49,18 +49,16 @@ pub fn player(
   let idle_atlas_handle = texture_atlases.add(idle_texture_atlas);
   let jump_atlas_handle = texture_atlases.add(jump_texture_atlas);
 
-  let player_width = 19.0 * scale;
-  let player_height = 33.0 * scale;
   let player = Player {
-    size: Vec2::new(player_width, player_height),
-    position: Vec2::new(player_width, player_height * 5.0),
-    velocity: Vec2::new(0.0, 0.0),
+    size: Vec2::new(21.0 * scale, 33.0 * scale),
+    velocity: Vec3::new(0.0, 0.0, 0.0),
   };
 
   commands
     .spawn(SpriteSheetComponents {
-      scale: Scale(scale),
-      translation: Translation::new(player.position.x(), player.position.y(), 15.0),
+      sprite: TextureAtlasSprite::new(0),
+      transform: Transform::from_translation(Vec3::new(16.0 * scale, 32.0 * scale * 5.0, 15.0))
+        .with_scale(scale),
       texture_atlas: idle_atlas_handle.clone(),
       ..Default::default()
     })
