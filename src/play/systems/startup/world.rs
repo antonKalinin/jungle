@@ -23,10 +23,7 @@ pub fn world(
   let scale = options.scale as f32;
 
   commands
-    .spawn(Camera2dComponents {
-      translation: Translation::new(0.0, 0.0, 20.0),
-      ..Default::default()
-    })
+    .spawn(Camera2dComponents::default())
     .with(Camera {});
 
   for i in 1..=5 {
@@ -37,9 +34,13 @@ pub fn world(
     for j in 0..=1 {
       commands
         .spawn(SpriteComponents {
-          scale: Scale(scale),
           material: materials.add(bg_handle.into()),
-          translation: Translation::new(scale * BG_WIDTH * j as f32, 0.0, i as f32),
+          transform: Transform::from_translation(Vec3::new(
+            scale * BG_WIDTH * j as f32,
+            0.0,
+            i as f32,
+          ))
+          .with_scale(scale),
           ..Default::default()
         })
         .with(Background {
@@ -79,15 +80,14 @@ pub fn world(
 
         commands
           .spawn(SpriteSheetComponents {
-            scale: Scale(scale),
+            transform: Transform::from_translation(Vec3::new(tile_x, tile_y, 10.0))
+              .with_scale(scale),
             sprite: TextureAtlasSprite::new(tile.gid - 1),
             texture_atlas: block_atlas_handle.clone(),
-            translation: Translation::new(tile_x, tile_y, 10.0),
             ..Default::default()
           })
           .with(Block {
             size: Vec2::new(tile_width * scale, tile_height * scale),
-            position: Vec2::new(tile_x, tile_y),
           });
       }
     }
