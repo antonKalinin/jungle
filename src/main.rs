@@ -5,10 +5,10 @@ mod resources;
 mod systems;
 
 use resources::Options;
-use systems::world;
+use systems::{movement, world};
 
-pub const WINDOW_WIDTH: f32 = 384.0;
-pub const WINDOW_HEIGHT: f32 = 216.0;
+const WINDOW_WIDTH: f32 = 384.0;
+const WINDOW_HEIGHT: f32 = 216.0;
 
 fn main() {
   let options: Options = argh::from_env();
@@ -28,5 +28,6 @@ fn main() {
     .add_resource(ClearColor(Color::rgb(0.01, 0.01, 0.01)))
     .add_default_plugins()
     .add_startup_system(world.system())
+    .add_system(movement.system())
     .run();
 }
