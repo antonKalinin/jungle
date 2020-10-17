@@ -22,9 +22,13 @@ pub fn world(
 ) {
   let scale = options.scale as f32;
 
+  // Camera
+
   commands
     .spawn(Camera2dComponents::default())
     .with(Camera {});
+
+  // Background
 
   for i in 1..=5 {
     let bg_handle = asset_server
@@ -48,6 +52,8 @@ pub fn world(
         });
     }
   }
+
+  // Surfaces
 
   let block_texture_handle = asset_server
     .load_sync(&mut textures, "assets/tileset.png")
@@ -92,4 +98,13 @@ pub fn world(
       }
     }
   }
+
+  // Objects
+  let object_handle = asset_server.load("assets/coin.png").unwrap();
+
+  commands.spawn(SpriteComponents {
+    material: materials.add(object_handle.into()),
+    transform: Transform::from_translation(Vec3::new(scale * 280.0, 60.0, 10.0)).with_scale(scale),
+    ..Default::default()
+  });
 }

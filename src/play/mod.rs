@@ -4,7 +4,7 @@ mod components;
 mod constants;
 mod systems;
 
-use systems::{animation, movement, player, world};
+use systems::{animation, gameover, movement, player, world};
 
 pub struct PlayPlugin;
 
@@ -14,6 +14,7 @@ impl Plugin for PlayPlugin {
       .add_startup_system(player.system())
       .add_startup_system(world.system())
       .add_system(movement.system())
-      .add_system(animation.system());
+      .add_system(animation.system())
+      .add_system(gameover.system());
   }
 }

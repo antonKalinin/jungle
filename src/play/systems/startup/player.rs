@@ -52,13 +52,13 @@ pub fn player(
   let player = Player {
     size: Vec2::new(21.0 * scale, 33.0 * scale),
     velocity: Vec3::new(0.0, 0.0, 0.0),
+    initial_position: Vec3::new(16.0 * scale, 32.0 * scale * 5.0, 15.0),
   };
 
   commands
     .spawn(SpriteSheetComponents {
       sprite: TextureAtlasSprite::new(0),
-      transform: Transform::from_translation(Vec3::new(16.0 * scale, 32.0 * scale * 5.0, 15.0))
-        .with_scale(scale),
+      transform: Transform::from_translation(player.initial_position).with_scale(scale),
       texture_atlas: idle_atlas_handle.clone(),
       ..Default::default()
     })

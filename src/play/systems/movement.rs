@@ -14,10 +14,10 @@ fn collide_aabb(a_position: Vec3, a_size: Vec2, b_position: Vec3, b_size: Vec2) 
   if (a_x - b_x).abs() < (a_w / 2.0 + b_size_x / 2.0)
     && (a_y - b_y).abs() < (a_h / 2.0 + b_size_y / 2.0)
   {
-    let h = (a_x - b_x).signum() * ((a_x - b_x).abs() - (a_w / 2.0 + b_size_x / 2.0));
-    let v = (a_y - b_y).signum() * ((a_y - b_y).abs() - (a_h / 2.0 + b_size_y / 2.0));
+    let x = (a_x - b_x).signum() * ((a_x - b_x).abs() - (a_w / 2.0 + b_size_x / 2.0));
+    let y = (a_y - b_y).signum() * ((a_y - b_y).abs() - (a_h / 2.0 + b_size_y / 2.0));
 
-    return Some(Vec2::new(h, v));
+    return Some(Vec2::new(x, y));
   }
 
   None
@@ -44,7 +44,7 @@ pub fn movement(
       player.velocity.set_x(0.0);
     }
 
-    if keyboard_input.just_released(KeyCode::Up) {
+    if keyboard_input.pressed(KeyCode::Up) {
       if player.velocity.y() == 0.0 {
         player.velocity.set_y(PLAYER_INITIAL_VERTICAL_SPEED);
       }

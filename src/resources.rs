@@ -15,7 +15,9 @@ pub struct Options {
 }
 
 #[derive(Default)]
-pub struct GameState {}
+pub struct GameState {
+  pub game_over: bool,
+}
 
 pub struct Sprites {
   library: HashMap<String, Handle<TextureAtlas>>,
