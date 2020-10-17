@@ -1,20 +1,14 @@
-use argh::FromArgs;
-use bevy::prelude::*;
+use bevy::{prelude::*, render::pass::ClearColor};
+
+mod components;
+mod resources;
+mod systems;
+
+use resources::Options;
+use systems::world;
 
 pub const WINDOW_WIDTH: f32 = 384.0;
 pub const WINDOW_HEIGHT: f32 = 216.0;
-
-#[derive(FromArgs)]
-#[argh(description = "Jungle game settings")]
-pub struct Options {
-  #[argh(
-    option,
-    default = "4",
-    short = 's',
-    description = "scale of game window"
-  )]
-  pub scale: u32,
-}
 
 fn main() {
   let options: Options = argh::from_env();
@@ -31,6 +25,8 @@ fn main() {
   App::build()
     .add_resource(window)
     .add_resource(options)
+    .add_resource(ClearColor(Color::rgb(0.01, 0.01, 0.01)))
     .add_default_plugins()
+    .add_startup_system(world.system())
     .run();
 }
