@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use super::super::super::resources::{Options, Sprites};
-use super::super::components::{Background, Camera, Player};
+use super::super::components::{Background, Camera, Object, Player};
 use super::super::constants::BG_WIDTH;
 
 pub fn animation(
@@ -11,11 +11,17 @@ pub fn animation(
   mut player_query: Query<(
     &Player,
     &Transform,
-    &mut Timer,
+    &Timer,
     &mut TextureAtlasSprite,
     &mut Handle<TextureAtlas>,
   )>,
   mut camera_query: Query<(&Camera, &mut Transform)>,
+  mut object_query: Query<(
+    &Object,
+    &Timer,
+    &mut TextureAtlasSprite,
+    &Handle<TextureAtlas>,
+  )>,
   mut background_query: Query<(&Background, &mut Transform)>,
 ) {
   let scale = options.scale as f32;
@@ -67,6 +73,13 @@ pub fn animation(
       } else if player_translation.x() - background_translation.x() < -BG_WIDTH * scale {
         *background_translation.x_mut() -= 2.0 * BG_WIDTH * scale;
       }
+    }
+  }
+
+  for (_object, timer, mut sprite, texture_atlas_handle) in &mut object_query.iter() {
+    if timer.finished {
+      let texture_atlas = texture_atlases.get(&texture_atlas_handle).unwrap();
+      sprite.index = ((sprite.index as usize + 1) % texture_atlas.textures.len()) as u32;
     }
   }
 }

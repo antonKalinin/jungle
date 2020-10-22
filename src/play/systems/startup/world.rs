@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use tiled::parse_file;
 
 use super::super::super::super::resources::Options;
-use super::super::super::components::{Background, Block, Camera};
+use super::super::super::components::{Background, Block, Camera, Object};
 use super::super::super::constants::{BG_HEIGHT, BG_WIDTH};
 
 #[derive(Bundle)]
@@ -14,6 +14,7 @@ struct BlockComponent {
 
 pub fn world(
   mut commands: Commands,
+  window: Res<WindowDescriptor>,
   options: Res<Options>,
   asset_server: Res<AssetServer>,
   mut textures: ResMut<Assets<Texture>>,
@@ -99,12 +100,31 @@ pub fn world(
     }
   }
 
-  // Objects
-  let object_handle = asset_server.load("assets/coin.png").unwrap();
+  let object_handle = asset_server
+    .load_sync(&mut textures, "assets/objects/coin.png")
+    .unwrap();
+  let object_texture = textures.get(&object_handle).unwrap();
+  let object_texture_atlas = TextureAtlas::from_grid(object_handle, object_texture.size, 8, 1);
 
-  commands.spawn(SpriteComponents {
-    material: materials.add(object_handle.into()),
-    transform: Transform::from_translation(Vec3::new(scale * 280.0, 60.0, 10.0)).with_scale(scale),
-    ..Default::default()
-  });
+  let object_atlas_handle = texture_atlases.add(object_texture_atlas);
+
+  // Objects
+  for group in map.object_groups.iter() {
+    for object in group.objects.iter() {
+      commands
+        .spawn(SpriteSheetComponents {
+          sprite: TextureAtlasSprite::new(0),
+          transform: Transform::from_translation(Vec3::new(
+            scale * object.x,
+            window.height as f32 / 2.0 - scale * object.y,
+            10.0,
+          ))
+          .with_scale(scale),
+          texture_atlas: object_atlas_handle.clone(),
+          ..Default::default()
+        })
+        .with(Object {})
+        .with(Timer::from_seconds(0.08, true));
+    }
+  }
 }
