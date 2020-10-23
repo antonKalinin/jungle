@@ -8,9 +8,11 @@ pub struct Block {
   pub size: Vec2,
 }
 
-pub struct Camera {}
+pub struct Coin {
+  pub size: Vec2,
+}
 
-pub struct Object {}
+pub struct Camera {}
 
 pub struct Player {
   pub size: Vec2,

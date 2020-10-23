@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use super::super::super::resources::GameState;
 use super::super::components::Player;
+use super::super::resources::GameState;
 
 pub fn gameover(
   mut game_state: ResMut<GameState>,

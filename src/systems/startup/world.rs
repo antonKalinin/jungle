@@ -3,9 +3,9 @@ use std::path::Path;
 use bevy::prelude::*;
 use tiled::parse_file;
 
-use super::super::super::super::resources::Options;
-use super::super::super::components::{Background, Block, Camera, Object};
+use super::super::super::components::{Background, Block, Camera, Coin};
 use super::super::super::constants::{BG_HEIGHT, BG_WIDTH};
+use super::super::super::resources::Options;
 
 #[derive(Bundle)]
 struct BlockComponent {
@@ -109,6 +109,7 @@ pub fn world(
   let object_atlas_handle = texture_atlases.add(object_texture_atlas);
 
   // Objects
+
   for group in map.object_groups.iter() {
     for object in group.objects.iter() {
       commands
@@ -123,7 +124,9 @@ pub fn world(
           texture_atlas: object_atlas_handle.clone(),
           ..Default::default()
         })
-        .with(Object {})
+        .with(Coin {
+          size: Vec2::new(object.width * scale, object.height * scale),
+        })
         .with(Timer::from_seconds(0.08, true));
     }
   }

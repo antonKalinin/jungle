@@ -1,12 +1,11 @@
 use bevy::prelude::*;
 
-use super::super::super::resources::{Options, Sprites};
-use super::super::components::{Background, Camera, Object, Player};
-use super::super::constants::BG_WIDTH;
+use super::super::components::{Background, Camera, Coin, Player};
+use super::super::resources::Sprites;
 
 pub fn animation(
-  options: Res<Options>,
   sprites: Res<Sprites>,
+  window: Res<WindowDescriptor>,
   texture_atlases: Res<Assets<TextureAtlas>>,
   mut player_query: Query<(
     &Player,
@@ -16,16 +15,14 @@ pub fn animation(
     &mut Handle<TextureAtlas>,
   )>,
   mut camera_query: Query<(&Camera, &mut Transform)>,
-  mut object_query: Query<(
-    &Object,
+  mut coin_query: Query<(
+    &Coin,
     &Timer,
     &mut TextureAtlasSprite,
     &Handle<TextureAtlas>,
   )>,
   mut background_query: Query<(&Background, &mut Transform)>,
 ) {
-  let scale = options.scale as f32;
-
   for (player, player_transform, timer, mut sprite, mut texture_atlas_handle) in
     &mut player_query.iter()
   {
@@ -68,15 +65,15 @@ pub fn animation(
 
       *background_translation.x_mut() += player.velocity.x() * background.acceleration;
 
-      if player_translation.x() - background_translation.x() > BG_WIDTH * scale {
-        *background_translation.x_mut() += 2.0 * BG_WIDTH * scale;
-      } else if player_translation.x() - background_translation.x() < -BG_WIDTH * scale {
-        *background_translation.x_mut() -= 2.0 * BG_WIDTH * scale;
+      if player_translation.x() - background_translation.x() > window.width as f32 {
+        *background_translation.x_mut() += 2.0 * window.width as f32;
+      } else if player_translation.x() - background_translation.x() < -(window.width as f32) {
+        *background_translation.x_mut() -= 2.0 * window.width as f32;
       }
     }
   }
 
-  for (_object, timer, mut sprite, texture_atlas_handle) in &mut object_query.iter() {
+  for (_coin, timer, mut sprite, texture_atlas_handle) in &mut coin_query.iter() {
     if timer.finished {
       let texture_atlas = texture_atlases.get(&texture_atlas_handle).unwrap();
       sprite.index = ((sprite.index as usize + 1) % texture_atlas.textures.len()) as u32;

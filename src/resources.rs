@@ -16,6 +16,7 @@ pub struct Options {
 
 #[derive(Default)]
 pub struct GameState {
+  pub coins: u8,
   pub game_over: bool,
 }
 

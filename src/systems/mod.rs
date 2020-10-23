@@ -1,8 +1,10 @@
+mod action;
 mod animation;
 mod gameover;
 mod movement;
 mod startup;
 
+pub use action::action;
 pub use animation::animation;
 pub use gameover::gameover;
 pub use movement::movement;

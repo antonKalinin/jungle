@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use super::super::super::super::resources::{Options, Sprites};
 use super::super::super::components::Player;
+use super::super::super::resources::{Options, Sprites};
 
 pub fn player(
   mut commands: Commands,
