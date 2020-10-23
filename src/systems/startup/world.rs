@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use tiled::parse_file;
 
 use super::super::super::components::{Background, Block, Camera, Coin};
-use super::super::super::constants::{BG_HEIGHT, BG_WIDTH};
+use super::super::super::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use super::super::super::resources::Options;
 
 #[derive(Bundle)]
@@ -41,7 +41,7 @@ pub fn world(
         .spawn(SpriteComponents {
           material: materials.add(bg_handle.into()),
           transform: Transform::from_translation(Vec3::new(
-            scale * BG_WIDTH * j as f32,
+            scale * WINDOW_WIDTH * j as f32,
             0.0,
             i as f32,
           ))
@@ -83,7 +83,7 @@ pub fn world(
         }
 
         let tile_x = (tile_width * i as f32) * scale;
-        let tile_y = (BG_HEIGHT / 2.0 - tile_height * j as f32) * scale;
+        let tile_y = (WINDOW_HEIGHT / 2.0 - tile_height * j as f32) * scale;
 
         commands
           .spawn(SpriteSheetComponents {

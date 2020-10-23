@@ -7,11 +7,9 @@ mod systems;
 mod utils;
 
 use bevy::{prelude::*, render::pass::ClearColor};
+use constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use resources::{GameState, Options, Sprites};
 use systems::{action, animation, gameover, movement, player, world};
-
-pub const WINDOW_WIDTH: f32 = 384.0;
-pub const WINDOW_HEIGHT: f32 = 216.0;
 
 fn main() {
   let options: Options = argh::from_env();
