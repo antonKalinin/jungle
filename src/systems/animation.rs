@@ -48,9 +48,17 @@ pub fn animation(
       }
     }
 
+    if player.is_grabbing {
+      if let Some(sprite_handle) = sprites.get("player_grab") {
+        *texture_atlas_handle = *sprite_handle;
+      }
+    }
+
     if timer.finished {
       let texture_atlas = texture_atlases.get(&texture_atlas_handle).unwrap();
-      sprite.index = ((sprite.index as usize + 1) % texture_atlas.textures.len()) as u32;
+      if !(player.is_grabbing && sprite.index == 5) {
+        sprite.index = ((sprite.index as usize + 1) % texture_atlas.textures.len()) as u32;
+      }
     }
 
     for (_camera, mut camera_transform) in &mut camera_query.iter() {

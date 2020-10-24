@@ -14,8 +14,13 @@ pub struct Coin {
 
 pub struct Camera {}
 
+pub struct Hook {
+  pub size: Vec2,
+}
+
 pub struct Player {
   pub size: Vec2,
   pub velocity: Vec3,
   pub initial_position: Vec3,
+  pub is_grabbing: bool,
 }

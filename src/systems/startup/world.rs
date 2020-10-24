@@ -3,7 +3,7 @@ use std::path::Path;
 use bevy::prelude::*;
 use tiled::parse_file;
 
-use super::super::super::components::{Background, Block, Camera, Coin};
+use super::super::super::components::{Background, Block, Camera, Coin, Hook};
 use super::super::super::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use super::super::super::resources::Options;
 
@@ -112,22 +112,42 @@ pub fn world(
 
   for group in map.object_groups.iter() {
     for object in group.objects.iter() {
-      commands
-        .spawn(SpriteSheetComponents {
-          sprite: TextureAtlasSprite::new(0),
-          transform: Transform::from_translation(Vec3::new(
-            scale * object.x,
-            window.height as f32 / 2.0 - scale * object.y,
-            10.0,
-          ))
-          .with_scale(scale),
-          texture_atlas: object_atlas_handle.clone(),
-          ..Default::default()
-        })
-        .with(Coin {
-          size: Vec2::new(object.width * scale, object.height * scale),
-        })
-        .with(Timer::from_seconds(0.08, true));
+      // Coins
+      if object.obj_type == "coin" {
+        commands
+          .spawn(SpriteSheetComponents {
+            sprite: TextureAtlasSprite::new(0),
+            transform: Transform::from_translation(Vec3::new(
+              scale * object.x,
+              window.height as f32 / 2.0 - scale * object.y,
+              10.0,
+            ))
+            .with_scale(scale),
+            texture_atlas: object_atlas_handle.clone(),
+            ..Default::default()
+          })
+          .with(Coin {
+            size: Vec2::new(object.width * scale, object.height * scale),
+          })
+          .with(Timer::from_seconds(0.08, true));
+      }
+
+      // Hooks
+      if object.obj_type == "hook" {
+        commands
+          .spawn(SpriteComponents {
+            transform: Transform::from_translation(Vec3::new(
+              scale * object.x,
+              window.height as f32 / 2.0 - scale * object.y,
+              10.0,
+            ))
+            .with_scale(scale),
+            ..Default::default()
+          })
+          .with(Hook {
+            size: Vec2::new(object.width * scale, object.height * scale),
+          });
+      }
     }
   }
 }
