@@ -13,10 +13,10 @@ pub fn action(
   for (player, player_transform) in &mut player_query.iter() {
     // Collecting coins
 
-    let player_translate = player_transform.translation();
+    let player_translate = player_transform.translation;
 
     for (coin_entity, coin, coin_transform) in &mut coin_query.iter() {
-      let coin_translate = coin_transform.translation();
+      let coin_translate = coin_transform.translation;
       let collision = collide_aabb(player_translate, player.size, coin_translate, coin.size);
 
       if let Some(_collision) = collision {

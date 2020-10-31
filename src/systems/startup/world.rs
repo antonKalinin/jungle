@@ -5,7 +5,7 @@ use tiled::parse_file;
 
 use super::super::super::components::{Background, Block, Camera, Coin, Hook};
 use super::super::super::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
-use super::super::super::resources::Options;
+use super::super::super::resources::{GameState, Options};
 
 #[derive(Bundle)]
 struct BlockComponent {
@@ -14,10 +14,10 @@ struct BlockComponent {
 
 pub fn world(
   mut commands: Commands,
-  window: Res<WindowDescriptor>,
   options: Res<Options>,
+  state: ResMut<GameState>,
+  window: Res<WindowDescriptor>,
   asset_server: Res<AssetServer>,
-  mut textures: ResMut<Assets<Texture>>,
   mut materials: ResMut<Assets<ColorMaterial>>,
   mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
@@ -26,26 +26,24 @@ pub fn world(
   // Camera
 
   commands
+    .spawn(UiCameraComponents::default())
     .spawn(Camera2dComponents::default())
-    .with(Camera {});
+    .with(Camera);
 
   // Background
 
   for i in 1..=5 {
-    let bg_handle = asset_server
-      .load(format!("assets/background/plx-{}.png", i))
-      .unwrap();
+    let bg_handle = asset_server.load(format!("background/plx-{}.png", i).as_str());
 
     for j in 0..=1 {
       commands
         .spawn(SpriteComponents {
-          material: materials.add(bg_handle.into()),
-          transform: Transform::from_translation(Vec3::new(
-            scale * WINDOW_WIDTH * j as f32,
-            0.0,
-            i as f32,
-          ))
-          .with_scale(scale),
+          material: materials.add(bg_handle.clone().into()),
+          transform: Transform {
+            translation: Vec3::new(scale * WINDOW_WIDTH * j as f32, 0.0, i as f32),
+            scale: Vec3::splat(scale),
+            ..Default::default()
+          },
           ..Default::default()
         })
         .with(Background {
@@ -56,14 +54,9 @@ pub fn world(
 
   // Surfaces
 
-  let block_texture_handle = asset_server
-    .load_sync(&mut textures, "assets/tileset.png")
-    .unwrap();
-  let block_texture = textures.get(&block_texture_handle).unwrap();
-  let block_texture_atlas =
-    TextureAtlas::from_grid(block_texture_handle, block_texture.size, 48, 23);
-
-  let block_atlas_handle = texture_atlases.add(block_texture_atlas);
+  let block_handle = asset_server.load("tileset.png");
+  let block_atlas = TextureAtlas::from_grid(block_handle, Vec2::new(16.0, 16.0), 48, 23);
+  let block_atlas_handle = texture_atlases.add(block_atlas);
 
   let map = parse_file(&Path::new("assets/level1.tmx")).unwrap();
 
@@ -87,8 +80,11 @@ pub fn world(
 
         commands
           .spawn(SpriteSheetComponents {
-            transform: Transform::from_translation(Vec3::new(tile_x, tile_y, 10.0))
-              .with_scale(scale),
+            transform: Transform {
+              translation: Vec3::new(tile_x, tile_y, 10.0),
+              scale: Vec3::splat(scale),
+              ..Default::default()
+            },
             sprite: TextureAtlasSprite::new(tile.gid - 1),
             texture_atlas: block_atlas_handle.clone(),
             ..Default::default()
@@ -100,13 +96,9 @@ pub fn world(
     }
   }
 
-  let object_handle = asset_server
-    .load_sync(&mut textures, "assets/objects/coin.png")
-    .unwrap();
-  let object_texture = textures.get(&object_handle).unwrap();
-  let object_texture_atlas = TextureAtlas::from_grid(object_handle, object_texture.size, 8, 1);
-
-  let object_atlas_handle = texture_atlases.add(object_texture_atlas);
+  let object_handle = asset_server.load("objects/coin.png");
+  let object_atlas = TextureAtlas::from_grid(object_handle, Vec2::new(16.0, 16.0), 8, 1);
+  let object_atlas_handle = texture_atlases.add(object_atlas);
 
   // Objects
 
@@ -117,12 +109,15 @@ pub fn world(
         commands
           .spawn(SpriteSheetComponents {
             sprite: TextureAtlasSprite::new(0),
-            transform: Transform::from_translation(Vec3::new(
-              scale * object.x,
-              window.height as f32 / 2.0 - scale * object.y,
-              10.0,
-            ))
-            .with_scale(scale),
+            transform: Transform {
+              translation: Vec3::new(
+                scale * object.x,
+                window.height as f32 / 2.0 - scale * object.y,
+                10.0,
+              ),
+              scale: Vec3::splat(scale),
+              ..Default::default()
+            },
             texture_atlas: object_atlas_handle.clone(),
             ..Default::default()
           })
@@ -136,12 +131,15 @@ pub fn world(
       if object.obj_type == "hook" {
         commands
           .spawn(SpriteComponents {
-            transform: Transform::from_translation(Vec3::new(
-              scale * object.x,
-              window.height as f32 / 2.0 - scale * object.y,
-              10.0,
-            ))
-            .with_scale(scale),
+            transform: Transform {
+              translation: Vec3::new(
+                scale * object.x,
+                window.height as f32 / 2.0 - scale * object.y,
+                10.0,
+              ),
+              scale: Vec3::splat(scale),
+              ..Default::default()
+            },
             ..Default::default()
           })
           .with(Hook {
@@ -150,4 +148,22 @@ pub fn world(
       }
     }
   }
+
+  // UI
+
+  commands.spawn(TextComponents {
+    style: Style {
+      align_self: AlignSelf::FlexEnd,
+      ..Default::default()
+    },
+    text: Text {
+      value: format!("coins: {}", state.coins),
+      font: asset_server.load("font/slkscre.ttf"),
+      style: TextStyle {
+        font_size: 48.0,
+        color: Color::WHITE,
+      },
+    },
+    ..Default::default()
+  });
 }

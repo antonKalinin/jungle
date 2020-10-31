@@ -12,8 +12,8 @@ pub fn gameover(
       game_state.game_over = true;
 
       player.velocity = Vec3::new(0.0, 0.0, 0.0);
-      player_transform.set_translation(player.initial_position);
-      player_transform.set_rotation(Quat::from_rotation_y(0.0));
+      player_transform.translation = player.initial_position;
+      player_transform.rotation = Quat::from_rotation_y(0.0);
     }
   }
 }
