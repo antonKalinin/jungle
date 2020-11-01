@@ -7,7 +7,7 @@ pub fn gameover(
   mut game_state: ResMut<GameState>,
   mut player_query: Query<(&mut Player, &mut Transform)>,
 ) {
-  for (mut player, mut player_transform) in &mut player_query.iter() {
+  for (mut player, mut player_transform) in player_query.iter_mut() {
     if player.velocity.y() < -50.0 {
       game_state.game_over = true;
 

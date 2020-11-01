@@ -4,7 +4,14 @@ edition = "2018"
 name = "jungle"
 version = "0.1.0"
 
+[lib]
+crate-type = ["staticlib"]
+name = "jungle"
+
+[[bin]]
+name = "jungle"
+
 [dependencies]
 argh = "0.1"
-bevy = {git = "https://github.com/bevyengine/bevy"}
+bevy = {git = "https://github.com/bevyengine/bevy", features = ["bevy_gilrs", "bevy_gltf", "bevy_wgpu", "bevy_winit", "render", "png", "hdr"], default-features = false}
 tiled = "0.9.3"

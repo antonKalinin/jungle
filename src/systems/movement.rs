@@ -11,7 +11,7 @@ pub fn movement(
   mut block_query: Query<(&Block, &Transform)>,
   mut hook_query: Query<(&Hook, &Transform)>,
 ) {
-  for (mut player, mut player_transform) in &mut player_query.iter() {
+  for (mut player, mut player_transform) in player_query.iter_mut() {
     if keyboard_input.pressed(KeyCode::Right) {
       player.velocity.set_x(PLAYER_HORIZONTAL_SPEED);
       player_transform.rotation = Quat::from_rotation_y(0.0);
@@ -39,7 +39,7 @@ pub fn movement(
 
     let mut player_next_translation = player_transform.translation + player.velocity;
 
-    for (block, block_transform) in &mut block_query.iter() {
+    for (block, block_transform) in block_query.iter_mut() {
       let block_translation = block_transform.translation;
       let collision = collide_aabb(
         player_next_translation,
@@ -64,7 +64,7 @@ pub fn movement(
       }
     }
 
-    for (hook, hook_transform) in &mut hook_query.iter() {
+    for (hook, hook_transform) in hook_query.iter_mut() {
       let hook_translation = hook_transform.translation;
       let player_translation = player_transform.translation;
       let collision = collide_aabb(player_translation, player.size, hook_translation, hook.size);

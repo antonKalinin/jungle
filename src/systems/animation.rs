@@ -24,7 +24,7 @@ pub fn animation(
   mut background_query: Query<(&Background, &mut Transform)>,
 ) {
   for (player, player_transform, timer, mut sprite, mut texture_atlas_handle) in
-    &mut player_query.iter()
+    player_query.iter_mut()
   {
     if player.velocity.x() != 0.0 {
       if let Some(player_run) = sprites.get("player_run") {
@@ -61,13 +61,13 @@ pub fn animation(
       }
     }
 
-    for (_camera, mut camera_transform) in &mut camera_query.iter() {
+    for (_camera, mut camera_transform) in camera_query.iter_mut() {
       camera_transform
         .translation
         .set_x(player_transform.translation.x());
     }
 
-    for (background, mut background_transform) in &mut background_query.iter() {
+    for (background, mut background_transform) in background_query.iter_mut() {
       let player_translation = player_transform.translation;
       let background_translation = background_transform.translation;
 
@@ -81,7 +81,7 @@ pub fn animation(
     }
   }
 
-  for (_coin, timer, mut sprite, texture_atlas_handle) in &mut coin_query.iter() {
+  for (_coin, timer, mut sprite, texture_atlas_handle) in coin_query.iter_mut() {
     if timer.finished {
       let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
       sprite.index = ((sprite.index as usize + 1) % texture_atlas.textures.len()) as u32;

@@ -1,4 +1,5 @@
 .DS_Store
+/build
 /target
 */.DS_Store
 *.code-workspace
