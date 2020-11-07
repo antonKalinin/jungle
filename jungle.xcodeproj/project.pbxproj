@@ -12,6 +12,7 @@
 		442540D056ADB9AE61A0A590 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F1B41978FA53999AA836D0F /* Security.framework */; };
 		55892F1396056740E1AF9685 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AF7DE91055EBD05ED77E57F9 /* main.m */; };
 		55B7188F81C3C4183F81D3AE /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A39528EB2CCB182F5328223A /* libc++.tbd */; };
+		79D6F56E255099DF00AB1FCF /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 79D6F56D255099DF00AB1FCF /* assets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,6 +28,7 @@
 /* Begin PBXFileReference section */
 		160DB77300A3F1806F024D47 /* bindings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bindings.h; sourceTree = "<group>"; };
 		55EAC02897847195D2F44C15 /* jungle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = jungle.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		79D6F56D255099DF00AB1FCF /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = "<group>"; };
 		8EE7F1E3B0303533925D7E33 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		96A1E5B62F48B379829E8A0D /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		9F1B41978FA53999AA836D0F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
@@ -65,12 +67,13 @@
 				8EE7F1E3B0303533925D7E33 /* Info.plist */,
 				AF7DE91055EBD05ED77E57F9 /* main.m */,
 			);
-			path = "ios";
+			path = ios;
 			sourceTree = "<group>";
 		};
 		8F2E3E6040EAD2EC9F3FA530 = {
 			isa = PBXGroup;
 			children = (
+				79D6F56D255099DF00AB1FCF /* assets */,
 				4F1D6F28B8A5D1927AB0ADED /* ios */,
 				EB028409C2D0655412DA6E44 /* Frameworks */,
 				321F7D6A765B38E746C35105 /* Products */,
@@ -115,6 +118,7 @@
 			buildPhases = (
 				9F13800790AD9DBC2BC0F116 /* Sources */,
 				D5A822CB2D6847BA8800BE4C /* Frameworks */,
+				79D6F56C255099C700AB1FCF /* Resources */,
 			);
 			buildRules = (
 			);
@@ -151,6 +155,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		79D6F56C255099C700AB1FCF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				79D6F56E255099DF00AB1FCF /* assets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		9F13800790AD9DBC2BC0F116 /* Sources */ = {
@@ -246,13 +261,13 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_CXX_LIBRARY = "libc++";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4B82KM45QA;
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"ios/",
+					ios/,
 				);
-				INFOPLIST_FILE = "ios/Info.plist";
+				INFOPLIST_FILE = ios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -267,7 +282,7 @@
 					"-ljungle",
 					"-lc++abi",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.bevy.jungle";
+				PRODUCT_BUNDLE_IDENTIFIER = com.bevy.jungle;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -346,13 +361,13 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_CXX_LIBRARY = "libc++";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4B82KM45QA;
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"ios/",
+					ios/,
 				);
-				INFOPLIST_FILE = "ios/Info.plist";
+				INFOPLIST_FILE = ios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -367,7 +382,7 @@
 					"-ljungle",
 					"-lc++abi",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.bevy.jungle";
+				PRODUCT_BUNDLE_IDENTIFIER = com.bevy.jungle;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

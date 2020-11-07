@@ -12,6 +12,8 @@ pub struct Coin {
   pub size: Vec2,
 }
 
+pub struct CoinsText;
+
 pub struct Camera;
 
 pub struct Hook {

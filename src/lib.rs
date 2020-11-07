@@ -7,15 +7,12 @@ mod systems;
 mod utils;
 
 use bevy::{prelude::*, render::pass::ClearColor, window::WindowMode};
-use constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use resources::{GameState, Options, Sprites};
 use systems::{action, animation, gameover, movement, player, world};
 
 #[no_mangle]
 extern "C" fn main_rs() {
   let options: Options = argh::from_env();
-  let window_width = options.scale * WINDOW_WIDTH as u32;
-  let window_height = options.scale * WINDOW_HEIGHT as u32;
 
   let window = WindowDescriptor {
     vsync: true,

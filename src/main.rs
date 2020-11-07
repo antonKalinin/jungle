@@ -9,7 +9,7 @@ mod utils;
 use bevy::{prelude::*, render::pass::ClearColor};
 use constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use resources::{GameState, Options, Sprites};
-use systems::{action, animation, gameover, movement, player, world};
+use systems::{action, animation, gameover, movement, player, ui, world};
 
 fn main() {
   let options: Options = argh::from_env();
@@ -43,5 +43,6 @@ fn main() {
     .add_system(action.system())
     .add_system(animation.system())
     .add_system(gameover.system())
+    .add_system(ui.system())
     .run();
 }

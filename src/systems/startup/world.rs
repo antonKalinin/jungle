@@ -3,7 +3,7 @@ use std::path::Path;
 use bevy::prelude::*;
 use tiled::parse_file;
 
-use super::super::super::components::{Background, Block, Camera, Coin, Hook};
+use super::super::super::components::{Background, Block, Camera, Coin, CoinsText, Hook};
 use super::super::super::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use super::super::super::resources::{GameState, Options};
 
@@ -151,19 +151,27 @@ pub fn world(
 
   // UI
 
-  commands.spawn(TextComponents {
-    style: Style {
-      align_self: AlignSelf::FlexEnd,
-      ..Default::default()
-    },
-    text: Text {
-      value: format!("coins: {}", state.coins),
-      font: asset_server.load("font/slkscre.ttf"),
-      style: TextStyle {
-        font_size: 48.0,
-        color: Color::WHITE,
+  commands
+    .spawn(TextComponents {
+      style: Style {
+        align_self: AlignSelf::FlexEnd,
+        position_type: PositionType::Absolute,
+        position: Rect {
+          top: Val::Px(16.0),
+          left: Val::Px(16.0),
+          ..Default::default()
+        },
+        ..Default::default()
       },
-    },
-    ..Default::default()
-  });
+      text: Text {
+        value: format!("Coins: {}", state.coins),
+        font: asset_server.load("font/m5x7.ttf"),
+        style: TextStyle {
+          font_size: 48.0,
+          color: Color::WHITE,
+        },
+      },
+      ..Default::default()
+    })
+    .with(CoinsText);
 }

@@ -5,14 +5,14 @@ ifndef DEVICE_ID
 	DEVICE=$(shell xcrun simctl list devices 'iOS' | grep -v 'unavailable' | grep -v '^--' | grep -v '==' | head -n 1 | cut -d ' ' -f 7 | sed 's/[()]//g')
 endif
 
-run: install
+ios: install
 	xcrun simctl launch --console $(DEVICE) com.bevy.jungle
 
 boot-sim:
 	xcrun simctl boot $(DEVICE) || true
 
 install: xcodebuild-simulator boot-sim
-	 xcrun simctl install $(DEVICE) build/Build/Products/Debug-iphonesimulator/jungle.app
+	xcrun simctl install $(DEVICE) build/Build/Products/Debug-iphonesimulator/jungle.app
 
 xcodebuild-simulator:
 	IOS_TARGETS=x86_64-apple-ios xcodebuild -scheme jungle -configuration Debug -derivedDataPath build -destination "id=$(DEVICE)"
