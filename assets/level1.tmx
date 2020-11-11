@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="120" height="14" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="34">
+<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="120" height="14" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="36">
  <tileset firstgid="1" source="tileset.tsx"/>
  <layer id="1" name="Tiles" width="120" height="14" offsetx="0.166667" offsety="0">
   <data encoding="csv">
@@ -36,5 +36,6 @@
   <object id="31" type="hook" x="303" y="111.667" width="16" height="16"/>
   <object id="32" type="hook" x="1327.33" y="95.3333" width="16" height="16"/>
   <object id="33" type="hook" x="1808.67" y="79.3333" width="16" height="16"/>
+  <object id="34" type="checkpoint" x="1851" y="61.3333" width="19" height="27"/>
  </objectgroup>
 </map>

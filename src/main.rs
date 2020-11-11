@@ -27,6 +27,7 @@ fn main() {
 
   let state = GameState {
     coins: 0,
+    time: 0.,
     game_over: false,
   };
 

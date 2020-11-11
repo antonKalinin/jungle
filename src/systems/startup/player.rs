@@ -42,6 +42,7 @@ pub fn player(
     velocity: Vec3::new(0.0, 0.0, 0.0),
     initial_position: Vec3::new(16.0 * scale, 32.0 * scale * 5.0, 15.0),
     is_grabbing: false,
+    is_in_air: false,
   };
 
   commands

@@ -14,7 +14,7 @@ pub fn movement(
   for (mut player, mut player_transform) in player_query.iter_mut() {
     if keyboard_input.pressed(KeyCode::Right) {
       player.velocity.set_x(PLAYER_HORIZONTAL_SPEED);
-      player_transform.rotation = Quat::from_rotation_y(0.0);
+      player_transform.rotation = Quat::from_rotation_y(0.);
     }
 
     if keyboard_input.pressed(KeyCode::Left) {
@@ -23,12 +23,13 @@ pub fn movement(
     }
 
     if keyboard_input.just_released(KeyCode::Right) || keyboard_input.just_released(KeyCode::Left) {
-      player.velocity.set_x(0.0);
+      player.velocity.set_x(0.);
     }
 
     if keyboard_input.pressed(KeyCode::Up) {
-      if player.velocity.y() == 0.0 {
+      if !player.is_in_air || player.is_grabbing {
         player.velocity.set_y(PLAYER_INITIAL_VERTICAL_SPEED);
+        player.is_in_air = true;
       }
     }
 
@@ -55,11 +56,15 @@ pub fn movement(
         if collision.x().abs() > collision.y().abs() && collision_sign_y == velocity_sign_y {
           *player_next_translation.y_mut() -= collision.y();
 
-          player.velocity.set_y(0.0);
+          if player.velocity.y() < 0. {
+            player.is_in_air = false;
+          }
+
+          player.velocity.set_y(0.);
         } else {
           *player_next_translation.x_mut() -= collision.x();
 
-          player.velocity.set_x(0.0);
+          player.velocity.set_x(0.);
         }
       }
     }
@@ -70,17 +75,16 @@ pub fn movement(
       let collision = collide_aabb(player_translation, player.size, hook_translation, hook.size);
 
       if let Some(_collision) = collision {
-        if (player_translation.y() - hook_translation.y()).abs() < 8.0 && player.velocity.y() < 0.0
-        {
+        if (player_translation.y() - hook_translation.y()).abs() < 8.0 && player.velocity.y() < 0. {
           player.is_grabbing = true;
-          player.velocity.set_y(0.0);
+          player.velocity.set_y(0.);
           *player_next_translation.y_mut() =
             hook_translation.y() + hook.size.y() / 2.0 - player.size.y() / 2.0;
         }
       }
     }
 
-    if player.velocity.y() > 0.0 || player.velocity.x().abs() > 0.0 {
+    if player.velocity.y() > 0. || player.velocity.x().abs() > 0. {
       player.is_grabbing = false;
     }
 

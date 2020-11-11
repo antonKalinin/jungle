@@ -3,7 +3,9 @@ use std::path::Path;
 use bevy::prelude::*;
 use tiled::parse_file;
 
-use super::super::super::components::{Background, Block, Camera, Coin, CoinsText, Hook};
+use super::super::super::components::{
+  Background, Block, Camera, CheckPoint, Coin, CoinsText, Hook, TimeText,
+};
 use super::super::super::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use super::super::super::resources::{GameState, Options};
 
@@ -96,9 +98,13 @@ pub fn world(
     }
   }
 
-  let object_handle = asset_server.load("objects/coin.png");
-  let object_atlas = TextureAtlas::from_grid(object_handle, Vec2::new(16.0, 16.0), 8, 1);
-  let object_atlas_handle = texture_atlases.add(object_atlas);
+  let coin_handle = asset_server.load("objects/coin.png");
+  let coin_atlas = TextureAtlas::from_grid(coin_handle, Vec2::new(16.0, 16.0), 8, 1);
+  let coin_atlas_handle = texture_atlases.add(coin_atlas);
+
+  let totem_handle = asset_server.load("objects/totem.png");
+  let totem_atlas = TextureAtlas::from_grid(totem_handle, Vec2::new(19.0, 27.0), 1, 1);
+  let totem_atlas_handle = texture_atlases.add(totem_atlas);
 
   // Objects
 
@@ -118,7 +124,7 @@ pub fn world(
               scale: Vec3::splat(scale),
               ..Default::default()
             },
-            texture_atlas: object_atlas_handle.clone(),
+            texture_atlas: coin_atlas_handle.clone(),
             ..Default::default()
           })
           .with(Coin {
@@ -146,11 +152,32 @@ pub fn world(
             size: Vec2::new(object.width * scale, object.height * scale),
           });
       }
+
+      // Checkpoints
+      if object.obj_type == "checkpoint" {
+        commands
+          .spawn(SpriteSheetComponents {
+            sprite: TextureAtlasSprite::new(0),
+            transform: Transform {
+              translation: Vec3::new(
+                scale * object.x,
+                window.height as f32 / 2.0 - scale * object.y,
+                9.0,
+              ),
+              scale: Vec3::splat(scale),
+              ..Default::default()
+            },
+            texture_atlas: totem_atlas_handle.clone(),
+            ..Default::default()
+          })
+          .with(CheckPoint);
+      }
     }
   }
 
   // UI
 
+  // Coins counter
   commands
     .spawn(TextComponents {
       style: Style {
@@ -168,10 +195,35 @@ pub fn world(
         font: asset_server.load("font/m5x7.ttf"),
         style: TextStyle {
           font_size: 48.0,
-          color: Color::WHITE,
+          color: Color::rgb(34., 32., 52.),
         },
       },
       ..Default::default()
     })
     .with(CoinsText);
+
+  // Time counter
+  commands
+    .spawn(TextComponents {
+      style: Style {
+        align_self: AlignSelf::FlexEnd,
+        position_type: PositionType::Absolute,
+        position: Rect {
+          top: Val::Px(64.0),
+          left: Val::Px(16.0),
+          ..Default::default()
+        },
+        ..Default::default()
+      },
+      text: Text {
+        value: format!("Time: {}", state.time),
+        font: asset_server.load("font/m5x7.ttf"),
+        style: TextStyle {
+          font_size: 48.0,
+          color: Color::rgb(34., 32., 52.),
+        },
+      },
+      ..Default::default()
+    })
+    .with(TimeText);
 }
