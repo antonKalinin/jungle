@@ -14,11 +14,28 @@ pub struct Options {
   pub scale: u32,
 }
 
-#[derive(Default)]
+#[derive(Debug)]
+pub enum Game {
+  Started,
+  Finished,
+  Paused,
+}
+
+#[derive(Debug)]
 pub struct GameState {
   pub coins: u8,
-  pub time: f32,
-  pub game_over: bool,
+  pub timer: f32,
+  pub game: Game,
+}
+
+impl Default for GameState {
+  fn default() -> Self {
+    Self {
+      coins: 0,
+      timer: 0.,
+      game: Game::Paused,
+    }
+  }
 }
 
 pub struct Sprites {

@@ -3,11 +3,9 @@ use std::path::Path;
 use bevy::prelude::*;
 use tiled::parse_file;
 
-use super::super::super::components::{
-  Background, Block, Camera, CheckPoint, Coin, CoinsText, Hook, TimeText,
-};
+use super::super::super::components::{Background, Block, Camera, CheckPoint, Coin, Hook};
 use super::super::super::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
-use super::super::super::resources::{GameState, Options};
+use super::super::super::resources::Options;
 
 #[derive(Bundle)]
 struct BlockComponent {
@@ -17,7 +15,6 @@ struct BlockComponent {
 pub fn world(
   mut commands: Commands,
   options: Res<Options>,
-  state: ResMut<GameState>,
   window: Res<WindowDescriptor>,
   asset_server: Res<AssetServer>,
   mut materials: ResMut<Assets<ColorMaterial>>,
@@ -170,60 +167,10 @@ pub fn world(
             texture_atlas: totem_atlas_handle.clone(),
             ..Default::default()
           })
-          .with(CheckPoint);
+          .with(CheckPoint {
+            size: Vec2::new(object.width * scale, object.height * scale),
+          });
       }
     }
   }
-
-  // UI
-
-  // Coins counter
-  commands
-    .spawn(TextComponents {
-      style: Style {
-        align_self: AlignSelf::FlexEnd,
-        position_type: PositionType::Absolute,
-        position: Rect {
-          top: Val::Px(16.0),
-          left: Val::Px(16.0),
-          ..Default::default()
-        },
-        ..Default::default()
-      },
-      text: Text {
-        value: format!("Coins: {}", state.coins),
-        font: asset_server.load("font/m5x7.ttf"),
-        style: TextStyle {
-          font_size: 48.0,
-          color: Color::rgb(34., 32., 52.),
-        },
-      },
-      ..Default::default()
-    })
-    .with(CoinsText);
-
-  // Time counter
-  commands
-    .spawn(TextComponents {
-      style: Style {
-        align_self: AlignSelf::FlexEnd,
-        position_type: PositionType::Absolute,
-        position: Rect {
-          top: Val::Px(64.0),
-          left: Val::Px(16.0),
-          ..Default::default()
-        },
-        ..Default::default()
-      },
-      text: Text {
-        value: format!("Time: {}", state.time),
-        font: asset_server.load("font/m5x7.ttf"),
-        style: TextStyle {
-          font_size: 48.0,
-          color: Color::rgb(34., 32., 52.),
-        },
-      },
-      ..Default::default()
-    })
-    .with(TimeText);
 }

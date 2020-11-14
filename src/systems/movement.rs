@@ -2,22 +2,28 @@ use bevy::prelude::*;
 
 use super::super::components::{Block, Hook, Player};
 use super::super::constants::{GRAVITY, PLAYER_HORIZONTAL_SPEED, PLAYER_INITIAL_VERTICAL_SPEED};
+use super::super::resources::{Game, GameState};
 use super::super::utils::collide_aabb;
 
 pub fn movement(
   time: Res<Time>,
   keyboard_input: Res<Input<KeyCode>>,
+  mut state: ResMut<GameState>,
   mut player_query: Query<(&mut Player, &mut Transform)>,
   mut block_query: Query<(&Block, &Transform)>,
   mut hook_query: Query<(&Hook, &Transform)>,
 ) {
   for (mut player, mut player_transform) in player_query.iter_mut() {
+    let mut key_pressed = false;
+
     if keyboard_input.pressed(KeyCode::Right) {
+      key_pressed = true;
       player.velocity.set_x(PLAYER_HORIZONTAL_SPEED);
       player_transform.rotation = Quat::from_rotation_y(0.);
     }
 
     if keyboard_input.pressed(KeyCode::Left) {
+      key_pressed = true;
       player.velocity.set_x(-PLAYER_HORIZONTAL_SPEED);
       player_transform.rotation = Quat::from_rotation_y(std::f32::consts::PI);
     }
@@ -27,9 +33,16 @@ pub fn movement(
     }
 
     if keyboard_input.pressed(KeyCode::Up) {
+      key_pressed = true;
       if !player.is_in_air || player.is_grabbing {
         player.velocity.set_y(PLAYER_INITIAL_VERTICAL_SPEED);
         player.is_in_air = true;
+      }
+    }
+
+    if key_pressed {
+      if let Game::Paused = state.game {
+        state.game = Game::Started;
       }
     }
 

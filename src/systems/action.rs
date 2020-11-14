@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use super::super::components::{Coin, Player};
-use super::super::resources::GameState;
+use super::super::components::{CheckPoint, Coin, Player};
+use super::super::resources::{Game, GameState};
 use super::super::utils::collide_aabb;
 
 pub fn action(
@@ -9,6 +9,7 @@ pub fn action(
   mut state: ResMut<GameState>,
   mut player_query: Query<(&Player, &Transform)>,
   mut coin_query: Query<(Entity, &Coin, &Transform)>,
+  mut cp_query: Query<(&CheckPoint, &Transform)>,
 ) {
   for (player, player_transform) in player_query.iter_mut() {
     // Collecting coins
@@ -22,6 +23,15 @@ pub fn action(
       if let Some(_collision) = collision {
         state.coins += 1;
         commands.despawn(coin_entity);
+      }
+    }
+
+    for (cp, cp_transform) in cp_query.iter_mut() {
+      let cp_translate = cp_transform.translation;
+      let collision = collide_aabb(player_translate, player.size, cp_translate, cp.size);
+
+      if let Some(_collision) = collision {
+        state.game = Game::Finished;
       }
     }
   }

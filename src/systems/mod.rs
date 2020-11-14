@@ -10,5 +10,6 @@ pub use animation::animation;
 pub use gameover::gameover;
 pub use movement::movement;
 pub use startup::player::player;
+pub use startup::ui::ui as sui;
 pub use startup::world::world;
 pub use ui::ui;

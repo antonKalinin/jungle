@@ -9,7 +9,7 @@ mod utils;
 use bevy::{prelude::*, render::pass::ClearColor};
 use constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use resources::{GameState, Options, Sprites};
-use systems::{action, animation, gameover, movement, player, ui, world};
+use systems::{action, animation, gameover, movement, player, sui, ui, world};
 
 fn main() {
   let options: Options = argh::from_env();
@@ -25,21 +25,16 @@ fn main() {
 
   let sprites = Sprites::new();
 
-  let state = GameState {
-    coins: 0,
-    time: 0.,
-    game_over: false,
-  };
-
   App::build()
+    .init_resource::<GameState>()
     .add_resource(window)
     .add_resource(options)
     .add_resource(sprites)
-    .add_resource(state)
     .add_resource(ClearColor(Color::rgb(0.01, 0.01, 0.01)))
     .add_default_plugins()
     .add_startup_system(player.system())
     .add_startup_system(world.system())
+    .add_startup_system(sui.system())
     .add_system(movement.system())
     .add_system(action.system())
     .add_system(animation.system())

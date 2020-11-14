@@ -8,7 +8,9 @@ pub struct Block {
   pub size: Vec2,
 }
 
-pub struct CheckPoint;
+pub struct CheckPoint {
+  pub size: Vec2,
+}
 
 pub struct Coin {
   pub size: Vec2,
@@ -26,8 +28,8 @@ pub struct Player {
   pub size: Vec2,
   pub velocity: Vec3,
   pub initial_position: Vec3,
-  pub is_in_air: bool,
   pub is_grabbing: bool,
+  pub is_in_air: bool,
 }
 
-pub struct TimeText;
+pub struct TimerText;
