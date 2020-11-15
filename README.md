@@ -1,9 +1,18 @@
 # JUNGLE
 
-<img src="https://github.com/antonKalinin/jungle/blob/master/assets/progress.gif?raw=true" width="480" />
+<img src="https://github.com/antonKalinin/jungle/blob/master/assets/progress.gif?raw=true" width="764" />
+
+Just wanted to have a collection of steps to create a platformer game using [rustlang](https://www.rust-lang.org/).
+This game made with [bevy](https://github.com/bevyengine/bevy).
 
 1. [Window size & scale options](https://github.com/antonKalinin/jungle/tree/1-window-options)
-1. [Parallax background](https://github.com/antonKalinin/jungle/tree/2-parallax-background)
+2. [Parallax background](https://github.com/antonKalinin/jungle/tree/2-parallax-background)
+3. Asset animations
+4. Loading map & objects
+5. Collision detection
+6. Extra interaction with objects & surfaces
+
+## Some useful gamedev hints:
 
 ### Split animated GIF to sequence of PNGs:
 
