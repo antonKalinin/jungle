@@ -1,6 +1,6 @@
 # JUNGLE
 
-<img src="https://github.com/antonKalinin/jungle/blob/master/assets/progress.gif?raw=true" width="764" />
+<img src="https://github.com/antonKalinin/jungle/blob/master/assets/jungle.gif?raw=true" width="764" />
 
 Just wanted to have a collection of steps to create a platformer game using [rustlang](https://www.rust-lang.org/).
 This game made with [bevy](https://github.com/bevyengine/bevy).
