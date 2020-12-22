@@ -14,10 +14,10 @@ pub fn ui(
   }
 
   for (mut text, mut timer, _tag) in timer_query.iter_mut() {
-    timer.tick(time.delta_seconds);
+    timer.tick(time.delta_seconds());
     if let Game::Started = state.game {
-      if timer.finished {
-        state.timer += timer.duration;
+      if timer.finished() {
+        state.timer += timer.duration();
         text.value = format!("Timer: {:.1$}", state.timer, 1);
       }
     }

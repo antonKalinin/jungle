@@ -13,8 +13,8 @@ use systems::{action, animation, gameover, movement, player, sui, ui, world};
 
 fn main() {
   let options: Options = argh::from_env();
-  let window_width = options.scale * WINDOW_WIDTH as u32;
-  let window_height = options.scale * WINDOW_HEIGHT as u32;
+  let window_width = options.scale as f32 * WINDOW_WIDTH;
+  let window_height = options.scale as f32 * WINDOW_HEIGHT;
 
   let window = WindowDescriptor {
     title: "Jungle".to_string(),
@@ -31,7 +31,7 @@ fn main() {
     .add_resource(options)
     .add_resource(sprites)
     .add_resource(ClearColor(Color::rgb(0.01, 0.01, 0.01)))
-    .add_default_plugins()
+    .add_plugins(DefaultPlugins)
     .add_startup_system(player.system())
     .add_startup_system(world.system())
     .add_startup_system(sui.system())

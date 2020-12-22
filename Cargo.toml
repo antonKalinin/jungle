@@ -9,5 +9,5 @@ name = "jungle"
 
 [dependencies]
 argh = "0.1"
-bevy = {git = "https://github.com/bevyengine/bevy"}
+bevy = "0.4"
 tiled = "0.9.3"

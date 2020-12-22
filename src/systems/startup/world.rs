@@ -13,7 +13,7 @@ struct BlockComponent {
 }
 
 pub fn world(
-  mut commands: Commands,
+  commands: &mut Commands,
   options: Res<Options>,
   window: Res<WindowDescriptor>,
   asset_server: Res<AssetServer>,
@@ -25,8 +25,8 @@ pub fn world(
   // Camera
 
   commands
-    .spawn(UiCameraComponents::default())
-    .spawn(Camera2dComponents::default())
+    .spawn(CameraUiBundle::default())
+    .spawn(Camera2dBundle::default())
     .with(Camera);
 
   // Background
@@ -36,7 +36,7 @@ pub fn world(
 
     for j in 0..=1 {
       commands
-        .spawn(SpriteComponents {
+        .spawn(SpriteBundle {
           material: materials.add(bg_handle.clone().into()),
           transform: Transform {
             translation: Vec3::new(scale * WINDOW_WIDTH * j as f32, 0.0, i as f32),
@@ -78,7 +78,7 @@ pub fn world(
         let tile_y = (WINDOW_HEIGHT / 2.0 - tile_height * j as f32) * scale;
 
         commands
-          .spawn(SpriteSheetComponents {
+          .spawn(SpriteSheetBundle {
             transform: Transform {
               translation: Vec3::new(tile_x, tile_y, 10.0),
               scale: Vec3::splat(scale),
@@ -110,7 +110,7 @@ pub fn world(
       // Coins
       if object.obj_type == "coin" {
         commands
-          .spawn(SpriteSheetComponents {
+          .spawn(SpriteSheetBundle {
             sprite: TextureAtlasSprite::new(0),
             transform: Transform {
               translation: Vec3::new(
@@ -133,7 +133,7 @@ pub fn world(
       // Hooks
       if object.obj_type == "hook" {
         commands
-          .spawn(SpriteComponents {
+          .spawn(SpriteBundle {
             transform: Transform {
               translation: Vec3::new(
                 scale * object.x,
@@ -153,7 +153,7 @@ pub fn world(
       // Checkpoints
       if object.obj_type == "checkpoint" {
         commands
-          .spawn(SpriteSheetComponents {
+          .spawn(SpriteSheetBundle {
             sprite: TextureAtlasSprite::new(0),
             transform: Transform {
               translation: Vec3::new(

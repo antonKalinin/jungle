@@ -3,10 +3,10 @@ use bevy::prelude::*;
 use super::super::super::components::{CoinsText, TimerText};
 use super::super::super::resources::GameState;
 
-pub fn ui(mut commands: Commands, state: ResMut<GameState>, asset_server: Res<AssetServer>) {
+pub fn ui(commands: &mut Commands, state: ResMut<GameState>, asset_server: Res<AssetServer>) {
   // Coins counter
   commands
-    .spawn(TextComponents {
+    .spawn(TextBundle {
       style: Style {
         align_self: AlignSelf::FlexEnd,
         position_type: PositionType::Absolute,
@@ -23,6 +23,7 @@ pub fn ui(mut commands: Commands, state: ResMut<GameState>, asset_server: Res<As
         style: TextStyle {
           font_size: 48.0,
           color: Color::rgb(34., 32., 52.),
+          ..Default::default()
         },
       },
       ..Default::default()
@@ -31,7 +32,7 @@ pub fn ui(mut commands: Commands, state: ResMut<GameState>, asset_server: Res<As
 
   // Timer
   commands
-    .spawn(TextComponents {
+    .spawn(TextBundle {
       style: Style {
         align_self: AlignSelf::FlexEnd,
         position_type: PositionType::Absolute,
@@ -48,6 +49,7 @@ pub fn ui(mut commands: Commands, state: ResMut<GameState>, asset_server: Res<As
         style: TextStyle {
           font_size: 48.0,
           color: Color::rgb(34., 32., 52.),
+          ..Default::default()
         },
       },
       ..Default::default()

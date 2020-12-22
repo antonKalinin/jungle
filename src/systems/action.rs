@@ -5,7 +5,7 @@ use super::super::resources::{Game, GameState};
 use super::super::utils::collide_aabb;
 
 pub fn action(
-  mut commands: Commands,
+  commands: &mut Commands,
   mut state: ResMut<GameState>,
   mut player_query: Query<(&Player, &Transform)>,
   mut coin_query: Query<(Entity, &Coin, &Transform)>,

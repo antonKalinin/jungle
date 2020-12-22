@@ -18,24 +18,24 @@ pub fn movement(
 
     if keyboard_input.pressed(KeyCode::Right) {
       key_pressed = true;
-      player.velocity.set_x(PLAYER_HORIZONTAL_SPEED);
-      player_transform.rotation = Quat::from_rotation_y(0.);
+      player.velocity.x = PLAYER_HORIZONTAL_SPEED;
+      player_transform.rotation = Quat::from_rotation_y(0.0);
     }
 
     if keyboard_input.pressed(KeyCode::Left) {
       key_pressed = true;
-      player.velocity.set_x(-PLAYER_HORIZONTAL_SPEED);
+      player.velocity.x = -PLAYER_HORIZONTAL_SPEED;
       player_transform.rotation = Quat::from_rotation_y(std::f32::consts::PI);
     }
 
     if keyboard_input.just_released(KeyCode::Right) || keyboard_input.just_released(KeyCode::Left) {
-      player.velocity.set_x(0.);
+      player.velocity.x = 0.0;
     }
 
     if keyboard_input.pressed(KeyCode::Up) {
       key_pressed = true;
       if !player.is_in_air || player.is_grabbing {
-        player.velocity.set_y(PLAYER_INITIAL_VERTICAL_SPEED);
+        player.velocity.y = PLAYER_INITIAL_VERTICAL_SPEED;
         player.is_in_air = true;
       }
     }
@@ -48,7 +48,7 @@ pub fn movement(
 
     // player is constantly affected by gravity
     if !player.is_grabbing {
-      *player.velocity.y_mut() -= GRAVITY * time.delta_seconds;
+      player.velocity.y -= GRAVITY * time.delta_seconds();
     }
 
     let mut player_next_translation = player_transform.translation + player.velocity;
@@ -63,21 +63,21 @@ pub fn movement(
       );
 
       if let Some(collision) = collision {
-        let collision_sign_y = collision.y().signum();
-        let velocity_sign_y = player.velocity.y().signum();
+        let collision_sign_y = collision.y.signum();
+        let velocity_sign_y = player.velocity.y.signum();
 
-        if collision.x().abs() > collision.y().abs() && collision_sign_y == velocity_sign_y {
-          *player_next_translation.y_mut() -= collision.y();
+        if collision.x.abs() > collision.y.abs() && collision_sign_y == velocity_sign_y {
+          player_next_translation.y -= collision.y;
 
-          if player.velocity.y() < 0. {
+          if player.velocity.y < 0.0 {
             player.is_in_air = false;
           }
 
-          player.velocity.set_y(0.);
+          player.velocity.y = 0.0;
         } else {
-          *player_next_translation.x_mut() -= collision.x();
+          player_next_translation.x -= collision.x;
 
-          player.velocity.set_x(0.);
+          player.velocity.x = 0.0;
         }
       }
     }
@@ -88,16 +88,15 @@ pub fn movement(
       let collision = collide_aabb(player_translation, player.size, hook_translation, hook.size);
 
       if let Some(_collision) = collision {
-        if (player_translation.y() - hook_translation.y()).abs() < 8.0 && player.velocity.y() < 0. {
+        if (player_translation.y - hook_translation.y).abs() < 8.0 && player.velocity.y < 0.0 {
           player.is_grabbing = true;
-          player.velocity.set_y(0.);
-          *player_next_translation.y_mut() =
-            hook_translation.y() + hook.size.y() / 2.0 - player.size.y() / 2.0;
+          player.velocity.y = 0.0;
+          player_next_translation.y = hook_translation.y + hook.size.y / 2.0 - player.size.y / 2.0;
         }
       }
     }
 
-    if player.velocity.y() > 0. || player.velocity.x().abs() > 0. {
+    if player.velocity.y > 0.0 || player.velocity.x.abs() > 0.0 {
       player.is_grabbing = false;
     }
 

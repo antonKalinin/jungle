@@ -4,7 +4,7 @@ use super::super::super::components::Player;
 use super::super::super::resources::{Options, Sprites};
 
 pub fn player(
-  mut commands: Commands,
+  commands: &mut Commands,
   options: Res<Options>,
   mut sprites: ResMut<Sprites>,
   asset_server: Res<AssetServer>,
@@ -46,7 +46,7 @@ pub fn player(
   };
 
   commands
-    .spawn(SpriteSheetComponents {
+    .spawn(SpriteSheetBundle {
       sprite: TextureAtlasSprite::new(0),
       transform: Transform {
         translation: player.initial_position,
