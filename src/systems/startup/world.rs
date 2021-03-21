@@ -25,8 +25,8 @@ pub fn world(
   // Camera
 
   commands
-    .spawn(CameraUiBundle::default())
-    .spawn(Camera2dBundle::default())
+    .spawn(UiCameraBundle::default())
+    .spawn(OrthographicCameraBundle::new_2d())
     .with(Camera);
 
   // Background

@@ -4,28 +4,31 @@ use super::super::components::{Background, Camera, Coin, Player};
 use super::super::resources::Sprites;
 
 pub fn animation(
+  time: Res<Time>,
   sprites: Res<Sprites>,
   window: Res<WindowDescriptor>,
   texture_atlases: Res<Assets<TextureAtlas>>,
   mut player_query: Query<(
     &Player,
     &Transform,
-    &Timer,
+    &mut Timer,
     &mut TextureAtlasSprite,
     &mut Handle<TextureAtlas>,
   )>,
   mut camera_query: Query<(&Camera, &mut Transform)>,
   mut coin_query: Query<(
     &Coin,
-    &Timer,
+    &mut Timer,
     &mut TextureAtlasSprite,
     &Handle<TextureAtlas>,
   )>,
   mut background_query: Query<(&Background, &mut Transform)>,
 ) {
-  for (player, player_transform, timer, mut sprite, mut texture_atlas_handle) in
+  for (player, player_transform, mut timer, mut sprite, mut texture_atlas_handle) in
     player_query.iter_mut()
   {
+    timer.tick(time.delta_seconds());
+
     if player.velocity.x != 0.0 {
       if let Some(player_run) = sprites.get("player_run") {
         texture_atlas_handle.id = player_run.id;
@@ -79,7 +82,8 @@ pub fn animation(
     }
   }
 
-  for (_coin, timer, mut sprite, texture_atlas_handle) in coin_query.iter_mut() {
+  for (_coin, mut timer, mut sprite, texture_atlas_handle) in coin_query.iter_mut() {
+    timer.tick(time.delta_seconds());
     if timer.finished() {
       let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
       sprite.index = ((sprite.index as usize + 1) % texture_atlas.textures.len()) as u32;
